@@ -9,9 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Supabase JS Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <!-- Supabase JS Client SDK (defer: non-blocking agar login tetap bekerja walau CDN lambat) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     
     <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="./manifest.json">
@@ -202,6 +202,10 @@
             gap: 8px;
         }
 
+        .quick-login-grid button:last-child {
+            grid-column: span 2;
+        }
+
         .btn-quick {
             background-color: #f3f4f6;
             color: var(--text-primary);
@@ -215,6 +219,30 @@
 
         .btn-quick:hover {
             background-color: #e5e7eb;
+        }
+
+        .btn-outline-gold {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+        .btn-outline-gold:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+        .btn-sm {
+            height: 28px;
+            padding: 0 10px;
+            font-size: 11px;
+            font-weight: 500;
         }
 
         /* 2. LAYOUT & SIDEBAR STYLING */
@@ -620,7 +648,7 @@
         }
 
         /* Responsive Layout Switch */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             .sidebar {
                 display: none !important;
             }
@@ -641,6 +669,22 @@
             .fab.visible {
                 display: flex;
             }
+
+            /* Table mobile view overrides */
+            .hide-mobile-cell {
+                display: none !important;
+            }
+            .show-mobile-cell {
+                display: table-cell !important;
+            }
+            .table-responsive table {
+                min-width: 100% !important;
+            }
+        }
+
+        /* Mobile Table Responsiveness */
+        .show-mobile-cell {
+            display: none !important;
         }
         @keyframes modalFadeIn {
             from { opacity: 0; transform: scale(0.95); }
@@ -673,10 +717,11 @@
 
             <div class="quick-login-title">Quick Login Peran</div>
             <div class="quick-login-grid">
-                <button class="btn btn-quick" onclick="quickLogin('pemohon')">Pemohon</button>
-                <button class="btn btn-quick" onclick="quickLogin('procurement')">Procurement</button>
-                <button class="btn btn-quick" onclick="quickLogin('budgeting')">Budgeting</button>
-                <button class="btn btn-quick" onclick="quickLogin('keuangan')">Keuangan</button>
+                <button type="button" class="btn btn-quick" onclick="quickLogin('pemohon')">Pemohon</button>
+                <button type="button" class="btn btn-quick" onclick="quickLogin('procurement')">Procurement</button>
+                <button type="button" class="btn btn-quick" onclick="quickLogin('budgeting')">Budgeting</button>
+                <button type="button" class="btn btn-quick" onclick="quickLogin('keuangan')">Keuangan</button>
+                <button type="button" class="btn btn-quick" onclick="quickLogin('kasir')">Kasir</button>
             </div>
         </div>
     </div>
@@ -767,9 +812,10 @@
                             <thead>
                                 <tr>
                                     <th>Tgl Pengajuan</th>
-                                    <th>Rincian Item</th>
-                                    <th>Status Alur</th>
-                                    <th>Keterangan / Alasan</th>
+                                    <th class="hide-mobile-cell">Rincian Item</th>
+                                    <th class="hide-mobile-cell">Status Alur</th>
+                                    <th class="hide-mobile-cell">Keterangan / Alasan</th>
+                                    <th class="show-mobile-cell" style="width: 60px; text-align: center;">Detail</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -892,8 +938,9 @@
                                 <tr>
                                     <th>No Kontrak</th>
                                     <th>No Invoice</th>
-                                    <th>File Terlampir</th>
-                                    <th>Status Alur</th>
+                                    <th class="hide-mobile-cell">File Terlampir</th>
+                                    <th class="hide-mobile-cell">Status Alur</th>
+                                    <th class="show-mobile-cell" style="width: 60px; text-align: center;">Detail</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -939,9 +986,10 @@
                                 <tr>
                                     <th>Tgl Bayar</th>
                                     <th>Unit Pemohon</th>
-                                    <th>No Invoice</th>
-                                    <th>Denda/Potongan</th>
+                                    <th class="hide-mobile-cell">No Invoice</th>
+                                    <th class="hide-mobile-cell">Denda/Potongan</th>
                                     <th>Pembayaran Final</th>
+                                    <th class="show-mobile-cell" style="width: 60px; text-align: center;">Detail</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1055,6 +1103,22 @@
             <h3 id="custom-alert-title" style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">Pemberitahuan</h3>
             <p id="custom-alert-message" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; word-break: break-word;"></p>
             <button id="custom-alert-btn" class="btn btn-primary" style="width: 100%; height: 38px; font-size: 13px; border-radius: 6px;" onclick="closeCustomAlert()">OK</button>
+        </div>
+    </div>
+
+    <!-- Reusable Row Details Modal for Mobile/Tablet -->
+    <div id="row-details-modal" class="modal" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 100000; padding: 20px;">
+        <div class="modal-content" style="background: white; border-radius: 8px; width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); animation: modalFadeIn 0.25s ease-out; box-sizing: border-box;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px;">
+                <h3 id="row-details-title" style="font-size: 16px; font-weight: 700; margin: 0; color: var(--text-primary);">Detail Informasi</h3>
+                <button onclick="closeRowDetailsModal()" style="background: transparent; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary);">&times;</button>
+            </div>
+            <div id="row-details-content" style="font-size: 13px; color: var(--text-primary); line-height: 1.6;">
+                <!-- Dynamically filled list -->
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn btn-secondary btn-sm" onclick="closeRowDetailsModal()" style="padding: 6px 14px; font-size: 12px; height: 32px; width: auto; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; background: white; color: var(--text-primary);">Tutup</button>
+            </div>
         </div>
     </div>
 
@@ -1427,6 +1491,10 @@
 
             if (settings.mode === 'supabase' && settings.url && settings.key) {
                 try {
+                    // Safety guard: pastikan Supabase CDN berhasil dimuat
+                    if (typeof supabase === 'undefined' || !supabase || !supabase.createClient) {
+                        throw new Error('Supabase CDN belum termuat');
+                    }
                     // Initialize Supabase Client
                     supabaseClient = supabase.createClient(settings.url, settings.key);
                     currentDbMode = 'supabase';
@@ -1683,12 +1751,15 @@
         function quickLogin(role) {
             document.getElementById('username').value = role;
             document.getElementById('password').value = 'admin123';
-            document.getElementById('login-form').dispatchEvent(new Event('submit'));
+            // Panggil langsung handleLogin dengan mock event untuk keandalan 100% di semua browser HP
+            handleLogin({ preventDefault: () => {} });
         }
 
         // Login Handler
         async function handleLogin(e) {
-            e.preventDefault();
+            if (e && typeof e.preventDefault === 'function') {
+                e.preventDefault();
+            }
             const user = document.getElementById('username').value.trim().toLowerCase();
             const pass = document.getElementById('password').value;
 
@@ -1709,14 +1780,21 @@
                 activeSession = roles[user];
                 localStorage.setItem('sipb_session', JSON.stringify(activeSession));
                 
-                // Transition UI
+                // Transisi UI langsung (Instant Feedback)
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-layout').style.display = 'flex';
                 
-                // Setup Menu & Role Views
-                await initDatabaseConnection();
+                // Render Menu & Dashboard Lokal terlebih dahulu agar tidak beku
                 renderMenusAndLayout();
                 loadRoleDashboard();
+                
+                // Hubungkan ke database secara asinkron di background
+                initDatabaseConnection().then(() => {
+                    if (activeSession) {
+                        renderMenusAndLayout();
+                        loadRoleDashboard();
+                    }
+                });
             } else {
                 showAlert('User tidak dikenal! Gunakan tombol Quick Login di bawah.', 'error');
             }
@@ -1964,19 +2042,22 @@
             
             const myRequests = dataStore.permintaan.filter(r => r.unit === activeSession.unit);
             if (myRequests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Belum ada riwayat pengajuan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Belum ada riwayat pengajuan.</td></tr>`;
                 return;
             }
 
             myRequests.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemsText = r.items.map(i => `${i.nama} (${i.qty} ${i.satuan})`).join(', ');
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvasForRequest('${r.id}')" style="min-width: unset; width: 32px; height: 32px; padding: 0; font-weight: bold; font-size: 14px;">...</button>`;
                 const statusBadge = getStatusBadge(r.status);
                 tr.innerHTML = `
                     <td>${r.tanggal}</td>
-                    <td>${itemsText}</td>
-                    <td>${statusBadge}</td>
-                    <td>${r.alasan}</td>
+                    <td class="hide-mobile-cell">${itemsText}</td>
+                    <td class="hide-mobile-cell">${statusBadge}</td>
+                    <td class="hide-mobile-cell">${r.alasan}</td>
+                    <td class="show-mobile-cell" style="text-align: center;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="showReqDetails('${r.id}')" style="min-width: unset; padding: 0.2rem 0.6rem; font-weight: bold; font-size: 11px; height: 28px; width: auto; background: white; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">...</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -2006,7 +2087,7 @@
 
             pending.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemsText = r.items.map(i => `${i.nama} (${i.qty} ${i.satuan})`).join(', ');
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvasForRequest('${r.id}')" style="min-width: unset; width: 32px; height: 32px; padding: 0; font-weight: bold; font-size: 14px;">...</button>`;
                 tr.innerHTML = `
                     <td>${r.unit}</td>
                     <td>${r.tanggal}</td>
@@ -2052,10 +2133,11 @@
 
             approved.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemsText = r.items.map(i => `${i.nama} (${i.qty} ${i.satuan})`).join(', ');
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvasForRequest('${r.id}')" style="min-width: unset; width: 32px; height: 32px; padding: 0; font-weight: bold; font-size: 14px;">...</button>`;
+                const costVal = r.estimasi_biaya ? `Rp ${r.estimasi_biaya.toLocaleString('id-ID')}` : 'Rp 0';
                 tr.innerHTML = `
                     <td>${r.unit}</td>
-                    <td>${itemsText} (Nominal Pagu: Rp ${r.estimasi_biaya.toLocaleString('id-ID')})</td>
+                    <td>${itemsText} (Nominal Pagu: ${costVal})</td>
                     <td>
                         <button class="btn btn-primary" onclick="openPksModal('${r.id}')" style="height: 32px; width: auto; font-size: 11px; padding: 0 12px;">+ Buat Kontrak PKS</button>
                     </td>
@@ -2201,7 +2283,7 @@
 
             pending.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemsText = r.items.map(i => `${i.nama} (${i.qty} ${i.satuan})`).join(', ');
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvasForRequest('${r.id}')" style="min-width: unset; width: 32px; height: 32px; padding: 0; font-weight: bold; font-size: 14px;">...</button>`;
                 const budgetInfo = dataStore.budget[r.unit];
                 const sisaAnggaran = budgetInfo ? budgetInfo.sisa : 0;
                 
@@ -2374,7 +2456,7 @@
             tbody.innerHTML = '';
 
             if (dataStore.tagihan.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Belum ada riwayat pencatatan tagihan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Belum ada riwayat pencatatan tagihan.</td></tr>`;
                 return;
             }
 
@@ -2383,8 +2465,11 @@
                 tr.innerHTML = `
                     <td>${t.noKontrak}</td>
                     <td>${t.noInvoice} (Termin ${t.terminIndex} - Rp ${t.nominal.toLocaleString('id-ID')})</td>
-                    <td>[PDF] ${t.invoiceFilePath}</td>
-                    <td>${getStatusBadge(t.status)}</td>
+                    <td class="hide-mobile-cell">[PDF] ${t.invoiceFilePath}</td>
+                    <td class="hide-mobile-cell">${getStatusBadge(t.status)}</td>
+                    <td class="show-mobile-cell" style="text-align: center;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="showTagihanDetails('${t.noInvoice}')" style="min-width: unset; padding: 0.2rem 0.6rem; font-weight: bold; font-size: 11px; height: 28px; width: auto; background: white; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">...</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -2491,7 +2576,7 @@
             tbody.innerHTML = '';
 
             if (dataStore.bukukas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Buku kas kosong.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Buku kas kosong.</td></tr>`;
                 return;
             }
 
@@ -2500,9 +2585,12 @@
                 tr.innerHTML = `
                     <td>${k.tanggal}</td>
                     <td>${k.unit}</td>
-                    <td>${k.noInvoice}</td>
-                    <td>Rp ${k.denda.toLocaleString('id-ID')}</td>
+                    <td class="hide-mobile-cell">${k.noInvoice}</td>
+                    <td class="hide-mobile-cell">Rp ${k.denda.toLocaleString('id-ID')}</td>
                     <td><strong>Rp ${k.nominalFinal.toLocaleString('id-ID')}</strong></td>
+                    <td class="show-mobile-cell" style="text-align: center;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="showKasirDetails('${k.id}')" style="min-width: unset; padding: 0.2rem 0.6rem; font-weight: bold; font-size: 11px; height: 28px; width: auto; background: white; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">...</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -2520,6 +2608,229 @@
                 return `<span class="status-badge status-paid">Lunas</span>`;
             }
             return `<span class="status-badge status-pending">${status}</span>`;
+        }
+
+        // Offcanvas Drawer helper functions
+        function openOffcanvas(title, contentHtml) {
+            document.getElementById('offcanvas-title').innerText = title;
+            document.getElementById('offcanvas-body').innerHTML = contentHtml;
+            document.getElementById('offcanvas-backdrop').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('offcanvas-drawer').style.right = '0';
+            }, 10);
+        }
+
+        function closeOffcanvas() {
+            document.getElementById('offcanvas-drawer').style.right = '-400px';
+            setTimeout(() => {
+                document.getElementById('offcanvas-backdrop').style.display = 'none';
+            }, 300);
+        }
+
+        function openOffcanvasForRequest(reqId) {
+            const req = dataStore.permintaan.find(r => r.id === reqId);
+            if (!req) return;
+            const items = req.items || [];
+            const itemsListHtml = `
+                <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                    ${items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah || 0} ${i.satuan || ''})</li>`).join('')}
+                </ul>`;
+            openOffcanvas(`Daftar Barang ${req.id}`, itemsListHtml);
+        }
+
+        function openOffcanvasForPks(noKontrak) {
+            const p = dataStore.pks.find(pks => pks.noKontrak === noKontrak || pks.no_kontrak === noKontrak);
+            if (!p) return;
+            
+            let items = p.items;
+            if (!items || items.length === 0) {
+                const reqId = p.permintaanId || p.req_id;
+                const req = dataStore.permintaan.find(r => r.id === reqId);
+                if (req) items = req.items;
+            }
+            if (!items) items = [];
+
+            const itemsListHtml = `
+                <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                    ${items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah || 0} ${i.satuan || ''})</li>`).join('')}
+                </ul>`;
+            openOffcanvas(`Daftar Barang ${p.noKontrak || p.no_kontrak}`, itemsListHtml);
+        }
+
+        function openOffcanvasForPksTermin(noKontrak) {
+            const p = dataStore.pks.find(pks => pks.noKontrak === noKontrak || pks.no_kontrak === noKontrak);
+            if (!p) return;
+            const termins = p.termins || p.termin || [];
+            const terminsListHtml = `
+                <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                    ${termins.map((t, idx) => {
+                        const indexStr = t.index || (idx + 1);
+                        const nominalStr = (t.nominal || 0).toLocaleString('id-ID');
+                        return `<li><strong>Termin ${indexStr}</strong>: ${t.persen}% — Rp ${nominalStr}</li>`;
+                    }).join('')}
+                </ul>`;
+            openOffcanvas(`Metode Pembayaran Kontrak ${p.noKontrak || p.no_kontrak}`, terminsListHtml);
+        }
+
+        // Row Details Modal Helper Functions
+        function openRowDetailsModal(title, detailsList) {
+            document.getElementById('row-details-title').innerText = title;
+            const contentDiv = document.getElementById('row-details-content');
+            contentDiv.innerHTML = '';
+            
+            const ul = document.createElement('ul');
+            ul.style.listStyle = 'none';
+            ul.style.padding = '0';
+            ul.style.margin = '0';
+            
+            detailsList.forEach(item => {
+                const li = document.createElement('li');
+                li.style.padding = '10px 0';
+                li.style.borderBottom = '1px solid var(--border-color)';
+                li.style.display = 'flex';
+                li.style.flexDirection = 'column';
+                li.style.gap = '2px';
+                
+                const label = document.createElement('span');
+                label.style.fontSize = '11px';
+                label.style.textTransform = 'uppercase';
+                label.style.fontWeight = '600';
+                label.style.color = 'var(--text-secondary)';
+                label.innerText = item.label;
+                
+                const val = document.createElement('span');
+                val.style.fontSize = '14px';
+                val.style.fontWeight = '500';
+                val.style.color = 'var(--text-primary)';
+                val.innerHTML = item.value;
+                
+                li.appendChild(label);
+                li.appendChild(val);
+                ul.appendChild(li);
+            });
+            contentDiv.appendChild(ul);
+            document.getElementById('row-details-modal').style.display = 'flex';
+        }
+
+        function closeRowDetailsModal() {
+            document.getElementById('row-details-modal').style.display = 'none';
+        }
+
+        function showReqDetails(reqId) {
+            const req = dataStore.permintaan.find(r => r.id === reqId);
+            if (!req) return;
+            
+            const statusBadge = getStatusBadge(req.status);
+            let itemsText = '';
+            req.items.forEach(item => {
+                itemsText += `• ${item.nama} (${item.qty} ${item.satuan})<br>`;
+            });
+
+            const details = [
+                { label: 'ID Transaksi', value: `<strong>${req.id}</strong>` },
+                { label: 'Tanggal Pengajuan', value: req.tanggal },
+                { label: 'Unit Pengaju', value: req.unit },
+                { label: 'Detail Barang', value: itemsText },
+                { label: 'Status Pengajuan', value: statusBadge },
+                { label: 'Keterangan / Alasan', value: req.alasan || '-' }
+            ];
+            
+            openRowDetailsModal(`Detail Pengajuan ${req.id}`, details);
+        }
+
+        function showPksDetails(noKontrak) {
+            const pks = dataStore.pks.find(p => p.noKontrak === noKontrak);
+            if (!pks) return;
+
+            let itemsText = '';
+            pks.items.forEach(item => {
+                itemsText += `• ${item.nama} (${item.qty} ${item.satuan}) - Rp ${item.harga.toLocaleString('id-ID')}/${item.satuan}<br>`;
+            });
+
+            let terminsText = '';
+            pks.termins.forEach((t, idx) => {
+                let badgeClass = 'status-pending';
+                if (t.status === 'PAID') badgeClass = 'status-paid';
+                else if (t.status === 'INVOICED') badgeClass = 'status-billed';
+                terminsText += `Termin ${idx+1}: ${t.persen}% (Rp ${t.nominal.toLocaleString('id-ID')}) - <span class="status-badge ${badgeClass}">${t.status}</span><br>`;
+            });
+
+            const details = [
+                { label: 'Nomor Kontrak PKS', value: `<strong>${pks.noKontrak}</strong>` },
+                { label: 'Nomor PO Supplier', value: pks.noPoSupplier },
+                { label: 'Tanggal Kontrak', value: pks.tanggal },
+                { label: 'ID Referensi Pengajuan', value: pks.reqId },
+                { label: 'Vendor Supplier', value: pks.vendorName },
+                { label: 'Detail Barang & Harga', value: itemsText },
+                { label: 'Skema Termin Pembayaran', value: terminsText },
+                { label: 'Total Nilai Kontrak', value: `<strong>Rp ${pks.totalNilai.toLocaleString('id-ID')}</strong>` }
+            ];
+
+            openRowDetailsModal(`Detail Kontrak PKS ${pks.noKontrak}`, details);
+        }
+
+        function showTagihanDetails(noInvoice) {
+            const t = dataStore.tagihan.find(tag => tag.noInvoice === noInvoice);
+            if (!t) return;
+
+            let badgeClass = 'status-pending';
+            let statusLabel = 'Menunggu';
+            if (t.status === 'PAID') {
+                badgeClass = 'status-paid';
+                statusLabel = 'Lunas';
+            }
+
+            const details = [
+                { label: 'Nomor Invoice', value: `<strong>${t.noInvoice}</strong>` },
+                { label: 'Nomor Kontrak PKS', value: t.pksNo },
+                { label: 'Termin Pembayaran', value: `Termin ke-${t.terminKe}` },
+                { label: 'Nilai Kontrak PKS', value: `Rp ${t.nominalPks.toLocaleString('id-ID')}` },
+                { label: 'Nilai Tagihan Terbit', value: `<strong>Rp ${t.nominalTagihan.toLocaleString('id-ID')}</strong>` },
+                { label: 'Status Tagihan', value: `<span class="status-badge ${badgeClass}">${statusLabel}</span>` }
+            ];
+
+            openRowDetailsModal(`Detail Tagihan ${t.noInvoice}`, details);
+        }
+
+        function showKasirDetails(noInvoice) {
+            const k = dataStore.bukukas.find(c => c.noInvoice === noInvoice);
+            if (!k) return;
+
+            const details = [
+                { label: 'Tanggal Bayar/Cair', value: k.tanggal },
+                { label: 'Referensi Invoice', value: `<strong>${k.noInvoice}</strong>` },
+                { label: 'Unit Pemohon', value: k.unit },
+                { label: 'Potongan/Denda', value: `Rp ${k.denda.toLocaleString('id-ID')}` },
+                { label: 'Total Uang Dicairkan', value: `<strong>Rp ${k.nominalFinal.toLocaleString('id-ID')}</strong>` }
+            ];
+
+            openRowDetailsModal(`Detail Realisasi Buku Kas`, details);
+        }
+
+        function showLaporanDetails(noKontrak) {
+            const p = dataStore.pks.find(pks => pks.noKontrak === noKontrak);
+            if (!p) return;
+            const req = dataStore.permintaan.find(r => r.id === p.reqId);
+            const tagihan = dataStore.tagihan.find(t => t.pksNo === p.noKontrak);
+            const kasir = tagihan ? dataStore.kasir.find(k => k.noInvoice === tagihan.noInvoice) : null;
+
+            let realisasiText = kasir ? `Lunas (Rp ${kasir.nominalFinal.toLocaleString('id-ID')})` : (tagihan ? 'Ditagihkan' : 'Belum Ditagih');
+            
+            let itemsText = '';
+            p.items.forEach(item => {
+                itemsText += `• ${item.nama} (${item.qty} ${item.satuan})<br>`;
+            });
+
+            const details = [
+                { label: 'Tanggal Kontrak', value: p.tanggal },
+                { label: 'Nomor PKS / PO', value: `${p.noKontrak} / ${p.noPoSupplier}` },
+                { label: 'Unit Pengaju', value: req ? req.unit : '-' },
+                { label: 'Detail Barang', value: itemsText },
+                { label: 'Nilai Pengadaan', value: `<strong>Rp ${p.totalNilai.toLocaleString('id-ID')}</strong>` },
+                { label: 'Realisasi Pembayaran', value: realisasiText }
+            ];
+
+            openRowDetailsModal(`Laporan Pengadaan ${p.noKontrak}`, details);
         }
 
         let charts = {};
@@ -2920,12 +3231,36 @@
             }
         }
 
-        // App start
-        window.onload = async function() {
+        // App start — DOMContentLoaded: inisialisasi cepat tanpa menunggu CDN
+        document.addEventListener('DOMContentLoaded', function() {
             initDataStore();
-            await initDatabaseConnection();
             checkSession();
-        };
+        });
+
+        // Setelah semua CDN dimuat (defer scripts), hubungkan database
+        window.addEventListener('load', function() {
+            initDatabaseConnection().then(() => {
+                if (activeSession) {
+                    renderMenusAndLayout();
+                    loadRoleDashboard();
+                }
+            });
+        });
     </script>
+
+    <!-- Reusable Offcanvas Drawer for Row Details -->
+    <div id="offcanvas-backdrop" onclick="closeOffcanvas()" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); z-index: 199999; animation: fadeIn 0.25s ease;"></div>
+    <div id="offcanvas-drawer" style="position: fixed; top: 0; right: -400px; width: 400px; max-width: 100%; height: 100vh; background: var(--card-bg, white); box-shadow: -5px 0 25px rgba(0,0,0,0.15); z-index: 200000; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-sizing: border-box; border-left: 1px solid var(--border-color);">
+        <div style="padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #111827; color: white;">
+            <h3 id="offcanvas-title" style="margin: 0; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; letter-spacing: -0.01em;">Rincian Barang</h3>
+            <button onclick="closeOffcanvas()" style="background: transparent; border: none; font-size: 24px; cursor: pointer; color: rgba(255,255,255,0.7); line-height: 1;">&times;</button>
+        </div>
+        <div id="offcanvas-body" style="padding: 24px; flex: 1; overflow-y: auto; background: var(--bg-color, #f9fafb); font-size: 14px; color: var(--text-primary);">
+            <!-- Injected details -->
+        </div>
+        <div style="padding: 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; background: var(--card-bg, white);">
+            <button class="btn btn-secondary btn-sm" onclick="closeOffcanvas()" style="height: 32px; width: auto; font-size: 12px; padding: 0 16px;">Tutup</button>
+        </div>
+    </div>
 </body>
 </html>
