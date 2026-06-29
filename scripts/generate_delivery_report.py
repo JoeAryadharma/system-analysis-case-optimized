@@ -90,57 +90,77 @@ def build_delivery_report():
     )
     pdf.add_page()
     pdf.document_header(subtitle="Laporan Penyerahan Resmi (Technical Delivery Report)")
-    desc_text = (
-        "Dokumen rilis resmi ini disusun oleh Joe Aryadharma untuk menyerahkan seluruh berkas solusi teknis "
-        "dan hasil pengujian terhadap studi kasus Sistem Informasi Pengadaan Barang (SIPB). "
-        "Proyek ini mencakup pengembangan aplikasi pada platform Web (PWA), Android Native (Jetpack Compose), "
-        "dan iOS Native (Swift) dengan mengedepankan keamanan hak akses pengguna berbasis peran (RBAC)"
-    )
-    if COMPILATION_MODE == 'optimized':
-        desc_text += " serta integrasi basis data awan Supabase secara real-time."
+    if COMPILATION_MODE == 'default':
+        desc_text = (
+            "Dokumen rilis resmi ini disusun oleh Joe Aryadharma untuk menyerahkan seluruh berkas dokumen "
+            "analisis spesifikasi kebutuhan dan hasil pengujian terhadap studi kasus Sistem Informasi Pengadaan "
+            "Barang (SIPB). Dokumen ini mencakup laporan Tugas 1 hingga Tugas 5 yang disusun berdasarkan "
+            "parameter pengujian standar dengan referensi ISO untuk verifikasi fungsionalitas alur pengadaan "
+            "pada 5 peran pengguna berbasis RBAC."
+        )
     else:
-        desc_text += " untuk verifikasi fungsionalitas alur pengadaan."
+        desc_text = (
+            "Dokumen rilis resmi ini disusun oleh Joe Aryadharma untuk menyerahkan seluruh berkas solusi teknis "
+            "dan hasil pengujian terhadap studi kasus Sistem Informasi Pengadaan Barang (SIPB). "
+            "Proyek ini mencakup pengembangan aplikasi pada platform Web (PWA), Android Native (Jetpack Compose), "
+            "dan iOS Native (Swift) dengan mengedepankan keamanan hak akses pengguna berbasis peran (RBAC) "
+            "serta integrasi basis data awan Supabase secara real-time."
+        )
     pdf.paragraph(desc_text)
     
     pdf.section_heading("1. Tautan Aplikasi Web Live (Vercel Production)")
-    pdf.paragraph(
-        "Aplikasi web prototipe telah dideploy secara daring pada platform Vercel dan dapat diakses "
-        "melalui tautan berikut untuk simulasi pengujian end-to-end:"
-    )
-    pdf.draw_bullet(
-        "https://test-case-system-analysis-case.vercel.app (Alternatif: https://web-app-ashy-nu.vercel.app)",
-        "Web App Versi Ter-optimasi (Supabase Cloud):"
-    )
-    pdf.draw_bullet(
-        "https://test-case-system-analysis-case-default.vercel.app (Alternatif: https://prototype-henna-xi.vercel.app)",
-        "Web App Versi Default (Offline Demo Mode):"
-    )
+    if COMPILATION_MODE == 'default':
+        pdf.paragraph(
+            "Aplikasi web prototipe versi default telah dideploy secara daring pada platform Vercel "
+            "dan dapat diakses melalui tautan berikut untuk simulasi pengujian fungsionalitas dasar:"
+        )
+        pdf.draw_bullet(
+            "https://test-case-system-analysis-case-default.vercel.app",
+            "Web App Versi Default:"
+        )
+    else:
+        pdf.paragraph(
+            "Aplikasi web prototipe telah dideploy secara daring pada platform Vercel dan dapat diakses "
+            "melalui tautan berikut untuk simulasi pengujian end-to-end:"
+        )
+        pdf.draw_bullet(
+            "https://test-case-system-analysis-case.vercel.app",
+            "Web App Versi Ter-optimasi (Supabase Cloud):"
+        )
     pdf.ln(3)
 
     pdf.section_heading("2. Tautan Repositori Kode Sumber (GitHub)")
-    pdf.paragraph(
-        "Seluruh repositori GitHub disetel dalam visibilitas publik untuk memudahkan peninjauan kode sumber "
-        "serta struktur arsitektur sistem oleh tim evaluator perusahaan:"
-    )
-    pdf.draw_bullet(
-        "https://github.com/JoeAryadharma/system-analysis-case-optimized",
-        "Repositori Proyek Ter-optimasi (Optimized):"
-    )
-    pdf.draw_bullet(
-        "https://github.com/JoeAryadharma/system-analysis-case-default",
-        "Repositori Dokumen Standar (Default):"
-    )
-    pdf.draw_bullet(
-        "https://github.com/JoeAryadharma/system-analysis-case-sipb",
-        "Repositori Master Integrasi (All-in-One):"
-    )
+    if COMPILATION_MODE == 'default':
+        pdf.paragraph(
+            "Repositori GitHub disetel dalam visibilitas publik untuk memudahkan peninjauan dokumen "
+            "laporan analisis dan diagram arsitektur oleh tim evaluator perusahaan:"
+        )
+        pdf.draw_bullet(
+            "https://github.com/JoeAryadharma/system-analysis-case-default",
+            "Repositori Dokumen Analisis Standar (Default):"
+        )
+    else:
+        pdf.paragraph(
+            "Seluruh repositori GitHub disetel dalam visibilitas publik untuk memudahkan peninjauan kode sumber "
+            "serta struktur arsitektur sistem oleh tim evaluator perusahaan:"
+        )
+        pdf.draw_bullet(
+            "https://github.com/JoeAryadharma/system-analysis-case-optimized",
+            "Repositori Proyek Ter-optimasi (Optimized):"
+        )
     pdf.ln(3)
 
-    pdf.section_heading("3. Tautan Folder Penyimpanan Laporan & File Biner (Google Drive)")
-    pdf.paragraph(
-        "Untuk kemudahan pengunduhan berkas dokumen laporan Tugas 1-5 format PDF, diagram alir sistem (High-Res), "
-        "skema SQL, serta file biner aplikasi Android (sipb-mobile.apk), silakan akses tautan Google Drive berikut:"
-    )
+    pdf.section_heading("3. Tautan Folder Penyimpanan Laporan (Google Drive)")
+    if COMPILATION_MODE == 'default':
+        pdf.paragraph(
+            "Untuk kemudahan pengunduhan berkas dokumen laporan Tugas 1-5 format PDF dan diagram alir sistem, "
+            "silakan akses tautan Google Drive berikut:"
+        )
+    else:
+        pdf.paragraph(
+            "Untuk kemudahan pengunduhan berkas dokumen laporan PDF, diagram alir sistem (High-Res), "
+            "skema SQL, serta file biner aplikasi Android (sipb-mobile.apk), silakan akses tautan Google Drive berikut:"
+        )
     pdf.draw_bullet(
         gdrive_link,
         "Google Drive Folder:"
