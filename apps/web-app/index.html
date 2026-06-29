@@ -2020,7 +2020,12 @@
 
             myRequests.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemsText = r.items.map(i => `${i.nama} (${i.qty} ${i.satuan})`).join(', ');
+                const itemCount = r.items.length;
+                const itemsListHtml = `
+                    <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                        ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
+                    </ul>`;
+                const itemsText = `<button type="button" class="btn-link" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="background: none; border: none; color: var(--accent-color); font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0; outline: none;">${itemCount} Barang</button>`;
                 const statusBadge = getStatusBadge(r.status);
                 tr.innerHTML = `
                     <td>${r.tanggal}</td>
@@ -2059,7 +2064,12 @@
 
             pending.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemsText = r.items.map(i => `${i.nama} (${i.qty} ${i.satuan})`).join(', ');
+                const itemCount = r.items.length;
+                const itemsListHtml = `
+                    <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                        ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
+                    </ul>`;
+                const itemsText = `<button type="button" class="btn-link" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="background: none; border: none; color: var(--accent-color); font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0; outline: none;">${itemCount} Barang</button>`;
                 tr.innerHTML = `
                     <td>${r.unit}</td>
                     <td>${r.tanggal}</td>
@@ -2105,10 +2115,16 @@
 
             approved.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemsText = r.items.map(i => `${i.nama} (${i.qty} ${i.satuan})`).join(', ');
+                const itemCount = r.items.length;
+                const itemsListHtml = `
+                    <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                        ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
+                    </ul>`;
+                const itemsText = `<button type="button" class="btn-link" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="background: none; border: none; color: var(--accent-color); font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0; outline: none;">${itemCount} Barang</button>`;
+                const costVal = r.estimasi_biaya ? `Rp ${r.estimasi_biaya.toLocaleString('id-ID')}` : 'Rp 0';
                 tr.innerHTML = `
                     <td>${r.unit}</td>
-                    <td>${itemsText} (Nominal Pagu: Rp ${r.estimasi_biaya.toLocaleString('id-ID')})</td>
+                    <td>${itemsText} (Nominal Pagu: ${costVal})</td>
                     <td>
                         <button class="btn btn-primary" onclick="openPksModal('${r.id}')" style="height: 32px; width: auto; font-size: 11px; padding: 0 12px;">+ Buat Kontrak PKS</button>
                     </td>
@@ -2254,7 +2270,12 @@
 
             pending.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemsText = r.items.map(i => `${i.nama} (${i.qty} ${i.satuan})`).join(', ');
+                const itemCount = r.items.length;
+                const itemsListHtml = `
+                    <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                        ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
+                    </ul>`;
+                const itemsText = `<button type="button" class="btn-link" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="background: none; border: none; color: var(--accent-color); font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0; outline: none;">${itemCount} Barang</button>`;
                 const budgetInfo = dataStore.budget[r.unit];
                 const sisaAnggaran = budgetInfo ? budgetInfo.sisa : 0;
                 
@@ -2578,6 +2599,23 @@
             } else if (status === 'PAID') {
                 return `<span class="status-badge status-paid">Lunas</span>`;
             return `<span class="status-badge status-pending">${status}</span>`;
+        }
+
+        // Offcanvas Drawer helper functions
+        function openOffcanvas(title, contentHtml) {
+            document.getElementById('offcanvas-title').innerText = title;
+            document.getElementById('offcanvas-body').innerHTML = contentHtml;
+            document.getElementById('offcanvas-backdrop').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('offcanvas-drawer').style.right = '0';
+            }, 10);
+        }
+
+        function closeOffcanvas() {
+            document.getElementById('offcanvas-drawer').style.right = '-400px';
+            setTimeout(() => {
+                document.getElementById('offcanvas-backdrop').style.display = 'none';
+            }, 300);
         }
 
         // Row Details Modal Helper Functions
@@ -3151,5 +3189,20 @@
             });
         };
     </script>
+
+    <!-- Reusable Offcanvas Drawer for Row Details -->
+    <div id="offcanvas-backdrop" onclick="closeOffcanvas()" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); z-index: 199999; animation: fadeIn 0.25s ease;"></div>
+    <div id="offcanvas-drawer" style="position: fixed; top: 0; right: -400px; width: 400px; max-width: 100%; height: 100vh; background: var(--card-bg, white); box-shadow: -5px 0 25px rgba(0,0,0,0.15); z-index: 200000; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-sizing: border-box; border-left: 1px solid var(--border-color);">
+        <div style="padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #111827; color: white;">
+            <h3 id="offcanvas-title" style="margin: 0; font-family: 'Inter', sans-serif; font-size: 1.1rem; font-weight: 600; letter-spacing: -0.01em;">Rincian Barang</h3>
+            <button onclick="closeOffcanvas()" style="background: transparent; border: none; font-size: 24px; cursor: pointer; color: rgba(255,255,255,0.7); line-height: 1;">&times;</button>
+        </div>
+        <div id="offcanvas-body" style="padding: 24px; flex: 1; overflow-y: auto; background: var(--bg-color, #f9fafb); font-size: 14px; color: var(--text-primary);">
+            <!-- Injected details -->
+        </div>
+        <div style="padding: 16px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end; background: var(--card-bg, white);">
+            <button class="btn btn-secondary btn-sm" onclick="closeOffcanvas()" style="height: 32px; width: auto; font-size: 12px; padding: 0 16px;">Tutup</button>
+        </div>
+    </div>
 </body>
 </html>
