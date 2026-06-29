@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/apps/web-app/index.html" },
+    { "source": "/index.html", "destination": "/apps/web-app/index.html" },
+    { "source": "/manifest.json", "destination": "/apps/web-app/manifest.json" },
+    { "source": "/sw.js", "destination": "/apps/web-app/sw.js" }
+  ]
+}
