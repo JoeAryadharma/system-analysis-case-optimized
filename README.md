@@ -1,7 +1,7 @@
 # Aplikasi SIPB Ter-optimasi & Laporan Analisis Lanjutan (Optimized Version)
 **Kandidat: Joe Aryadharma (System Analyst & Developer)**
 
-Selamat datang di repositori utama untuk solusi teknis **Sistem Informasi Pengadaan Barang (SIPB)**. Repositori ini berisi kode sumber aplikasi siap rilis untuk platform Web (PWA), Android, dan iOS yang terintegrasi dengan database awan Supabase, serta dokumen analisis taktis tambahan.
+Selamat datang di direktori utama untuk solusi teknis **Sistem Informasi Pengadaan Barang (SIPB)**. Folder ini berisi kode sumber aplikasi siap rilis untuk platform Web (PWA), Android, dan iOS yang terintegrasi dengan database awan Supabase, serta dokumen analisis taktis tambahan.
 
 ---
 
@@ -29,7 +29,7 @@ Unduh dan pasang berkas biner aplikasi Android langsung di ponsel Anda:
 
 ---
 
-## 📂 Struktur Berkas Repositori
+## 📂 Struktur Berkas Direktori
 * 📁 **`/web-app`**: Kode program web PWA (HTML, CSS, JS) dengan Supabase Client SDK.
 * 📁 **`/app`**: Kode program aplikasi Android native (Jetpack Compose).
 * 📁 **`/assets`**: Aset antarmuka iOS native.
