@@ -9,9 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Chart.js CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Supabase JS Client SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <!-- Supabase JS Client SDK (defer: non-blocking agar login tetap bekerja walau CDN lambat) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     
     <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="./manifest.json">
@@ -3230,17 +3230,21 @@
             }
         }
 
-        // App start
-        window.onload = function() {
+        // App start — DOMContentLoaded: inisialisasi cepat tanpa menunggu CDN
+        document.addEventListener('DOMContentLoaded', function() {
             initDataStore();
             checkSession();
+        });
+
+        // Setelah semua CDN dimuat (defer scripts), hubungkan database
+        window.addEventListener('load', function() {
             initDatabaseConnection().then(() => {
                 if (activeSession) {
                     renderMenusAndLayout();
                     loadRoleDashboard();
                 }
             });
-        };
+        });
     </script>
 
     <!-- Reusable Offcanvas Drawer for Row Details -->
