@@ -1723,12 +1723,15 @@
         function quickLogin(role) {
             document.getElementById('username').value = role;
             document.getElementById('password').value = 'admin123';
-            document.getElementById('login-form').dispatchEvent(new Event('submit'));
+            // Panggil langsung handleLogin dengan mock event untuk keandalan 100% di semua browser HP
+            handleLogin({ preventDefault: () => {} });
         }
 
         // Login Handler
         async function handleLogin(e) {
-            e.preventDefault();
+            if (e && typeof e.preventDefault === 'function') {
+                e.preventDefault();
+            }
             const user = document.getElementById('username').value.trim().toLowerCase();
             const pass = document.getElementById('password').value;
 
@@ -1749,14 +1752,21 @@
                 activeSession = roles[user];
                 localStorage.setItem('sipb_session', JSON.stringify(activeSession));
                 
-                // Transition UI
+                // Transisi UI langsung (Instant Feedback)
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-layout').style.display = 'flex';
                 
-                // Setup Menu & Role Views
-                await initDatabaseConnection();
+                // Render Menu & Dashboard Lokal terlebih dahulu agar tidak beku
                 renderMenusAndLayout();
                 loadRoleDashboard();
+                
+                // Hubungkan ke database secara asinkron di background
+                initDatabaseConnection().then(() => {
+                    if (activeSession) {
+                        renderMenusAndLayout();
+                        loadRoleDashboard();
+                    }
+                });
             } else {
                 showAlert('User tidak dikenal! Gunakan tombol Quick Login di bawah.', 'error');
             }
@@ -2690,20 +2700,19 @@
             openRowDetailsModal(`Detail Tagihan ${t.noInvoice}`, details);
         }
 
-        function showKasirDetails(payId) {
-            const k = dataStore.kasir.find(c => c.id === payId);
+        function showKasirDetails(noInvoice) {
+            const k = dataStore.bukukas.find(c => c.noInvoice === noInvoice);
             if (!k) return;
 
             const details = [
-                { label: 'ID Pembayaran Kasir', value: `<strong>${k.id}</strong>` },
                 { label: 'Tanggal Bayar/Cair', value: k.tanggal },
-                { label: 'Referensi Invoice', value: k.noInvoice },
-                { label: 'Nilai Tagihan Pokok', value: `Rp ${k.nominalTagihan.toLocaleString('id-ID')}` },
+                { label: 'Referensi Invoice', value: `<strong>${k.noInvoice}</strong>` },
+                { label: 'Unit Pemohon', value: k.unit },
                 { label: 'Potongan/Denda', value: `Rp ${k.denda.toLocaleString('id-ID')}` },
                 { label: 'Total Uang Dicairkan', value: `<strong>Rp ${k.nominalFinal.toLocaleString('id-ID')}</strong>` }
             ];
 
-            openRowDetailsModal(`Detail Realisasi Kasir ${k.id}`, details);
+            openRowDetailsModal(`Detail Realisasi Buku Kas`, details);
         }
 
         function showLaporanDetails(noKontrak) {
@@ -3131,10 +3140,15 @@
         }
 
         // App start
-        window.onload = async function() {
+        window.onload = function() {
             initDataStore();
-            await initDatabaseConnection();
             checkSession();
+            initDatabaseConnection().then(() => {
+                if (activeSession) {
+                    renderMenusAndLayout();
+                    loadRoleDashboard();
+                }
+            });
         };
     </script>
 </body>
