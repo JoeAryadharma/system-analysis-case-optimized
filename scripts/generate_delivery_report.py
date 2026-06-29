@@ -2,6 +2,10 @@ import os
 import sys
 from fpdf import FPDF
 
+COMPILATION_MODE = 'optimized' # default
+if len(sys.argv) > 1 and sys.argv[1] in ['default', 'optimized']:
+    COMPILATION_MODE = sys.argv[1]
+
 class TechnicalDeliveryPDF(FPDF):
     def __init__(self, document_title, doc_code, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -86,14 +90,17 @@ def build_delivery_report():
     )
     pdf.add_page()
     pdf.document_header(subtitle="Laporan Penyerahan Resmi (Technical Delivery Report)")
-    
-    pdf.paragraph(
+    desc_text = (
         "Dokumen rilis resmi ini disusun oleh Joe Aryadharma untuk menyerahkan seluruh berkas solusi teknis "
         "dan hasil pengujian terhadap studi kasus Sistem Informasi Pengadaan Barang (SIPB). "
         "Proyek ini mencakup pengembangan aplikasi pada platform Web (PWA), Android Native (Jetpack Compose), "
-        "dan iOS Native (Swift) dengan mengedepankan keamanan hak akses pengguna berbasis peran (RBAC) "
-        "serta integrasi basis data awan Supabase secara real-time."
+        "dan iOS Native (Swift) dengan mengedepankan keamanan hak akses pengguna berbasis peran (RBAC)"
     )
+    if COMPILATION_MODE == 'optimized':
+        desc_text += " serta integrasi basis data awan Supabase secara real-time."
+    else:
+        desc_text += " untuk verifikasi fungsionalitas alur pengadaan."
+    pdf.paragraph(desc_text)
     
     pdf.section_heading("1. Tautan Aplikasi Web Live (Vercel Production)")
     pdf.paragraph(
@@ -140,27 +147,30 @@ def build_delivery_report():
     )
     pdf.ln(3)
 
-    pdf.section_heading("4. Ringkasan Peningkatan & Optimasi Sistem")
-    pdf.paragraph(
-        "Sistem SIPB versi Optimized telah dibekali dengan berbagai penyempurnaan taktis:"
-    )
-    pdf.draw_bullet(
-        "Mengintegrasikan client-side SDK Supabase untuk sinkronisasi database awan secara real-time pada 5 peran pengguna.",
-        "Integrasi Supabase Cloud:"
-    )
-    pdf.draw_bullet(
-        "Mengganti popup alert() browser dengan modal dialog kustom yang dilengkapi animasi mikro fade-in dan ikon visual yang estetis.",
-        "Kustom Dialog Alert & UX:"
-    )
-    pdf.draw_bullet(
-        "Menampilkan format rupiah ter-lokalisasi secara live di bawah input estimasi anggaran (Budgeting) dan denda potongan kasir.",
-        "Nominal Currency Helper:"
-    )
-    pdf.draw_bullet(
-        "Menyertakan analisis RACI matrix, estimasi Story Points, peta jalur kritis pengembangan, operational risk register, dan audit keamanan eksternal.",
-        "Laporan Analisis Taktis:"
-    )
-    pdf.ln(4)
+    if COMPILATION_MODE == 'optimized':
+        pdf.section_heading("4. Ringkasan Peningkatan & Optimasi Sistem")
+        pdf.paragraph(
+            "Sistem SIPB versi Optimized telah dibekali dengan berbagai penyempurnaan taktis:"
+        )
+        pdf.draw_bullet(
+            "Mengintegrasikan client-side SDK Supabase untuk sinkronisasi database awan secara real-time pada 5 peran pengguna.",
+            "Integrasi Supabase Cloud:"
+        )
+        pdf.draw_bullet(
+            "Mengganti popup alert() browser dengan modal dialog kustom yang dilengkapi animasi mikro fade-in dan ikon visual yang estetis.",
+            "Kustom Dialog Alert & UX:"
+        )
+        pdf.draw_bullet(
+            "Menampilkan format rupiah ter-lokalisasi secara live di bawah input estimasi anggaran (Budgeting) dan denda potongan kasir.",
+            "Nominal Currency Helper:"
+        )
+        pdf.draw_bullet(
+            "Menyertakan analisis RACI matrix, estimasi Story Points, peta jalur kritis pengembangan, operational risk register, dan audit keamanan eksternal.",
+            "Laporan Analisis Taktis:"
+        )
+        pdf.ln(4)
+    else:
+        pdf.ln(2)
     
     # Sign-off section
     pdf.set_text_color(31, 41, 55)
