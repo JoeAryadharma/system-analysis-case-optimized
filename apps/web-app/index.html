@@ -854,6 +854,9 @@
 
                 <div class="card">
                     <h3 class="card-title">Penyusunan Kontrak PKS (Pagu Budget Disetujui)</h3>
+                    <div style="background-color: hsl(45, 65%, 96%); border: 1px solid var(--border-color); color: var(--text-primary); padding: 12px; border-radius: 4px; margin-bottom: 15px; font-size: 13px; line-height: 1.5;">
+                        ℹ️ <strong>Alur Draft PO:</strong> Kirim Draft PO ke vendor (di luar sistem). Setelah vendor membalas dengan PO resmi, input nomor PO supplier resmi dan lengkapi detail item pada form PKS di bawah.
+                    </div>
                     <div class="table-responsive">
                         <table class="table" id="table-procure-pks">
                             <thead>
@@ -918,15 +921,45 @@
                             <div id="tagihan-details-text"></div>
                         </div>
                         <div class="form-group">
+                            <label class="form-label">Tanggal Tagihan</label>
+                            <input class="form-input" type="date" id="tagihan-tgl" required>
+                        </div>
+                        <div class="form-group">
                             <label class="form-label">Nomor Invoice Tagihan Vendor</label>
                             <input class="form-input" type="text" id="tagihan-no-invoice" required placeholder="INV-2026-XXXX">
                         </div>
+
+                        <div class="form-group" id="tagihan-items-container" style="display: none; margin-top: 15px;">
+                            <label class="form-label" style="font-weight: 700;">Breakdown Item Tagihan (Dapat Disesuaikan)</label>
+                            <div class="table-responsive" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px; margin-bottom: 8px;">
+                                <table class="table" id="tagihan-items-table" style="font-size: 11px; margin-bottom: 0;">
+                                    <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+                                        <tr>
+                                            <th>Nama Barang</th>
+                                            <th style="width: 70px;">Jumlah</th>
+                                            <th style="width: 70px;">Satuan</th>
+                                            <th style="width: 120px;">Harga Satuan</th>
+                                            <th style="width: 100px;">Potongan</th>
+                                            <th style="width: 110px;">Total</th>
+                                            <th style="width: 32px;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tagihan-items-body"></tbody>
+                                </table>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="addTagihanItemRow()" style="height: 28px; padding: 0 10px; font-size: 11px;">+ Tambah Item Tagihan</button>
+                        </div>
+
+                        <div class="form-group" id="tagihan-total-container" style="display: none; text-align: right; font-size: 14px; font-weight: 700; color: var(--accent-color); margin-bottom: 15px;">
+                            <span>Total Nilai Tagihan: </span><span id="tagihan-total-label">Rp 0</span>
+                        </div>
+
                         <div class="form-group">
                             <label class="form-label">Unggah Berkas Invoice (Simulasi PDF/Gambar)</label>
                             <input class="form-input" type="file" id="tagihan-file" required onchange="previewInvoiceFile()">
                             <p id="invoice-file-preview" style="font-size: 11px; color: var(--accent-color); margin-top: 4px;"></p>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="max-width: 200px;">Kirim Tagihan ke Kasir</button>
+                        <button type="submit" class="btn btn-primary" style="max-width: 250px;">Kirim Tagihan ke Kasir</button>
                     </form>
                 </div>
 
@@ -1002,9 +1035,20 @@
 
             <!-- SECTION 6: ANALITIK & LAPORAN -->
             <div id="section-analitik" class="content-section">
-                <div class="section-header">
-                    <h2 class="section-title" id="analitik-title">Analitik & Laporan Pengadaan</h2>
-                    <p class="section-subtitle" id="analitik-subtitle">Visualisasi performa konsumsi anggaran dan logistik secara real-time.</p>
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <h2 class="section-title" id="analitik-title">Analitik & Laporan Pengadaan</h2>
+                        <p class="section-subtitle" id="analitik-subtitle">Visualisasi performa konsumsi anggaran dan logistik secara real-time.</p>
+                    </div>
+                    <div>
+                        <select id="analitik-period-filter" class="form-input" style="width: 180px; height: 38px; padding: 6px 12px; font-size: 13px;" onchange="handlePeriodFilterChange()">
+                            <option value="ALL">Semua Periode</option>
+                            <option value="DAILY">Harian (Hari Ini)</option>
+                            <option value="WEEKLY">Mingguan (7 Hari Terakhir)</option>
+                            <option value="MONTHLY">Bulanan (30 Hari Terakhir)</option>
+                            <option value="YEARLY">Tahunan (Tahun Ini)</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div id="analitik-content-grid" style="display: flex; flex-wrap: wrap; gap: 20px;">
@@ -1058,21 +1102,63 @@
 
     <!-- 4. PROCUREMENT PKS CONTRACT MODAL -->
     <div class="modal" id="pks-contract-modal">
-        <div class="modal-card">
+        <div class="modal-card" style="max-width: 750px;">
             <div class="modal-header">
                 <h3 class="modal-title">Penyusunan Kontrak PKS & Termin</h3>
                 <button class="modal-close" onclick="closePksModal()">×</button>
             </div>
             <form onsubmit="submitPksContract(event)">
                 <input type="hidden" id="pks-permintaan-id">
-                <div class="form-group">
-                    <label class="form-label">Nomor Kontrak PKS</label>
-                    <input class="form-input" type="text" id="pks-no-kontrak" required placeholder="PKS/2026/PRO/XXXX">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                        <label class="form-label">Nomor Kontrak PKS</label>
+                        <input class="form-input" type="text" id="pks-no-kontrak" required placeholder="PKS/2026/PRO/XXXX">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nomor Draft PO (Auto-Generated)</label>
+                        <input class="form-input" type="text" id="pks-no-draft" readonly style="background-color: #f3f4f6;">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group">
+                        <label class="form-label">Nomor PO Supplier</label>
+                        <input class="form-input" type="text" id="pks-no-po" required placeholder="PO-SUPP-2026-XXXX">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tanggal Kontrak</label>
+                        <input class="form-input" type="date" id="pks-tgl-kontrak" required>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Nomor PO Supplier</label>
-                    <input class="form-input" type="text" id="pks-no-po" required placeholder="PO-SUPP-2026-XXXX">
+                    <label class="form-label">Nama Vendor (Supplier)</label>
+                    <input class="form-input" type="text" id="pks-nama-vendor" required placeholder="Masukkan nama vendor resmi">
                 </div>
+                
+                <div class="form-group">
+                    <label class="form-label" style="font-weight: 700;">Breakdown Item Kontrak & Harga Satuan</label>
+                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 4px;">
+                        <table class="table" id="pks-items-table" style="font-size: 11px; margin-bottom: 0;">
+                            <thead style="position: sticky; top: 0; background: white; z-index: 1;">
+                                <tr>
+                                    <th>Nama Barang</th>
+                                    <th style="width: 70px;">Jumlah</th>
+                                    <th style="width: 70px;">Satuan</th>
+                                    <th style="width: 120px;">Harga Satuan</th>
+                                    <th style="width: 100px;">Potongan</th>
+                                    <th style="width: 110px;">Total</th>
+                                    <th style="width: 32px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="pks-items-body"></tbody>
+                        </table>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addPksItemRow()" style="margin-top: 6px; height: 28px; padding: 0 10px; font-size: 11px;">+ Tambah Item Kontrak</button>
+                </div>
+
+                <div class="form-group" style="margin-top: 10px; text-align: right; font-size: 14px; font-weight: 700; color: var(--accent-color);">
+                    <span>Total Nilai Kontrak: </span><span id="pks-total-kontrak-label">Rp 0</span>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Unggah Bukti PO Supplier (Simulasi PDF/Gambar)</label>
                     <input class="form-input" type="file" id="pks-po-file" required onchange="previewPoFile()">
@@ -1092,7 +1178,48 @@
         </div>
     </div>
 
-
+    <!-- 4.6 KASIR PENCAIRAN MODAL -->
+    <div class="modal" id="kasir-pencairan-modal">
+        <div class="modal-card" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Pencairan Dana & Otorisasi</h3>
+                <button class="modal-close" onclick="closeKasirPencairanModal()">×</button>
+            </div>
+            <form onsubmit="submitKasirPencairan(event)">
+                <input type="hidden" id="pencairan-tagihan-id">
+                <div class="form-group">
+                    <label class="form-label">Nomor Invoice</label>
+                    <input class="form-input" type="text" id="pencairan-no-invoice" readonly style="background-color: #f3f4f6;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Unit Pengaju</label>
+                    <input class="form-input" type="text" id="pencairan-unit" readonly style="background-color: #f3f4f6;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tanggal Pembayaran (Pencairan)</label>
+                    <input class="form-input" type="date" id="pencairan-tgl" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nominal Tagihan (Plafon)</label>
+                    <input class="form-input" type="text" id="pencairan-plafon-label" readonly style="background-color: #f3f4f6; font-weight: bold; color: var(--accent-color);">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nominal Pembayaran Realisasi</label>
+                    <input class="form-input" type="number" id="pencairan-nominal" required min="1" placeholder="Masukkan nominal pembayaran" oninput="calculateKasirFinal()">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Denda / Potongan (Jika Ada)</label>
+                    <input class="form-input" type="number" id="pencairan-denda" required min="0" value="0" placeholder="Masukkan denda" oninput="calculateKasirFinal()">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nominal Bersih yang Dicairkan (Final)</label>
+                    <input class="form-input" type="text" id="pencairan-final-label" readonly style="background-color: #f3f4f6; font-weight: bold; color: green;">
+                </div>
+                <div id="kasir-modal-error" style="color: #ef4444; font-size: 12px; margin-bottom: 12px; display: none;"></div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Setujui & Cairkan Dana</button>
+            </form>
+        </div>
+    </div>
 
     <!-- 4.5 CUSTOM ALERT MODAL -->
     <div id="custom-alert-modal" class="modal" style="z-index: 2000; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.5); display: none;">
@@ -1541,8 +1668,8 @@
                 const [budgetRes, reqRes, pksRes, tagihanRes, bukukasRes] = await Promise.all([
                     supabaseClient.from('budget_limits').select('*'),
                     supabaseClient.from('permintaan').select('*, permintaan_items(*)'),
-                    supabaseClient.from('pks_kontrak').select('*, pks_termins(*)'),
-                    supabaseClient.from('tagihan').select('*'),
+                    supabaseClient.from('pks_kontrak').select('*, pks_termins(*), pks_items(*)'),
+                    supabaseClient.from('tagihan').select('*, tagihan_items(*)'),
                     supabaseClient.from('bukukas').select('*')
                 ]);
 
@@ -1577,21 +1704,33 @@
                     });
                 });
 
-                // Map PKS & termins
+                // Map PKS & termins & items
                 pksRes.data.forEach(p => {
                     newStore.pks.push({
                         id: p.id,
                         permintaanId: p.permintaan_id,
                         noKontrak: p.no_kontrak,
+                        noDraftPo: p.no_draft_po,
                         noPo: p.no_po,
+                        tanggalKontrak: p.tanggal_kontrak,
+                        namaVendor: p.nama_vendor,
                         totalHarga: parseFloat(p.total_harga),
                         poFilePath: p.po_file_path,
+                        items: p.pks_items ? p.pks_items.map(i => ({
+                            nama: i.nama_barang,
+                            qty: i.jumlah,
+                            satuan: i.satuan,
+                            harga_satuan: parseFloat(i.harga_satuan),
+                            potongan_harga: parseFloat(i.potongan_harga),
+                            harga_total: parseFloat(i.harga_total)
+                        })) : [],
                         termins: p.pks_termins ? p.pks_termins.map(t => ({
                             id: t.id,
                             persen: parseFloat(t.persen),
                             nominal: parseFloat(t.nominal),
                             status: t.status,
-                            index: t.termin_index
+                            index: t.termin_index,
+                            tanggalPembayaran: t.tanggal_pembayaran
                         })) : []
                     });
                 });
@@ -1608,19 +1747,31 @@
                         noInvoice: tg.no_invoice,
                         nominal: parseFloat(tg.nominal),
                         invoiceFilePath: tg.invoice_file_path,
+                        tanggalTagihan: tg.tanggal_tagihan,
                         status: tg.status,
-                        terminIndex: matchedTermin ? matchedTermin.index : 1
+                        terminIndex: matchedTermin ? matchedTermin.index : 1,
+                        items: tg.tagihan_items ? tg.tagihan_items.map(i => ({
+                            nama: i.nama_barang,
+                            qty: i.jumlah,
+                            satuan: i.satuan,
+                            harga_satuan: parseFloat(i.harga_satuan),
+                            potongan_harga: parseFloat(i.potongan_harga),
+                            harga_total: parseFloat(i.harga_total)
+                        })) : []
                     });
                 });
 
                 // Map bukukas
                 bukukasRes.data.forEach(bk => {
                     newStore.bukukas.push({
+                        id: bk.id,
                         tanggal: bk.tanggal,
                         unit: bk.unit,
                         noInvoice: bk.no_invoice,
+                        nominalFinal: parseFloat(bk.nominal_final),
                         denda: parseFloat(bk.denda),
-                        nominalFinal: parseFloat(bk.nominal_final)
+                        tanggalPembayaran: bk.tanggal_pembayaran || bk.tanggal,
+                        nominalPembayaranSebelumPotongan: parseFloat(bk.nominal_pembayaran_sebelum_potongan || bk.nominal_final)
                     });
                 });
 
@@ -1666,18 +1817,37 @@
                     const { data: inserted, error } = await supabaseClient.from('pks_kontrak').insert([{
                         permintaan_id: data.permintaanId,
                         no_kontrak: data.noKontrak,
+                        no_draft_po: data.noDraftPo,
                         no_po: data.noPo,
+                        tanggal_kontrak: data.tanggalContract || data.tanggalKontrak,
+                        nama_vendor: data.namaVendor,
                         total_harga: data.totalHarga,
                         po_file_path: data.poFilePath
                     }]).select();
                     if (error) throw error;
                     
                     data.id = inserted[0].id;
+
+                    // Insert PKS items
+                    const items = data.items.map(i => ({
+                        pks_id: inserted[0].id,
+                        nama_barang: i.nama,
+                        jumlah: i.qty,
+                        satuan: i.satuan,
+                        harga_satuan: i.harga_satuan,
+                        potongan_harga: i.potongan_harga,
+                        harga_total: i.harga_total
+                    }));
+                    const { error: itemsErr } = await supabaseClient.from('pks_items').insert(items);
+                    if (itemsErr) throw itemsErr;
+
+                    // Insert termins
                     const termins = data.termins.map(t => ({
                         pks_id: inserted[0].id,
                         termin_index: t.index,
                         persen: t.persen,
                         nominal: t.nominal,
+                        tanggal_pembayaran: t.tanggalPembayaran,
                         status: t.status
                     }));
                     const { data: insertedTermins, error: terminsErr } = await supabaseClient.from('pks_termins').insert(termins).select();
@@ -1697,21 +1867,38 @@
                         no_invoice: data.noInvoice,
                         nominal: data.nominal,
                         invoice_file_path: data.invoiceFilePath,
+                        tanggal_tagihan: data.tanggalTagihan,
                         status: data.status
                     }]).select();
                     if (error) throw error;
                     
                     data.id = inserted[0].id;
+
+                    // Insert tagihan items
+                    const items = data.items.map(i => ({
+                        tagihan_id: inserted[0].id,
+                        nama_barang: i.nama,
+                        jumlah: i.qty,
+                        satuan: i.satuan,
+                        harga_satuan: i.harga_satuan,
+                        potongan_harga: i.potongan_harga,
+                        harga_total: i.harga_total
+                    }));
+                    const { error: itemsErr } = await supabaseClient.from('tagihan_items').insert(items);
+                    if (itemsErr) throw itemsErr;
+
                     await supabaseClient.from('pks_termins').update({ status: 'BILLING_RECORDED' }).eq('id', data.terminId);
                 } else if (table === 'bukukas' && action === 'insert') {
                     const { error } = await supabaseClient.from('bukukas').insert([{
                         tanggal: data.tanggal,
                         unit: data.unit,
                         no_invoice: data.noInvoice,
-                        nominal_pembayaran: data.nominalFinal,
+                        nominal_pembayaran: data.nominalPembayaran,
                         denda: data.denda,
                         nominal_final: data.nominalFinal,
-                        tipe: 'DEBET'
+                        tipe: 'DEBET',
+                        tanggal_pembayaran: data.tanggalPembayaran,
+                        nominal_pembayaran_sebelum_potongan: data.nominalPembayaranSebelumPotongan
                     }]);
                     if (error) throw error;
                     
@@ -2147,14 +2334,41 @@
         }
 
         let terminCount = 0;
+        let pksItemsTotalCost = 0;
+
         function openPksModal(permintaanId) {
             document.getElementById('pks-contract-modal').style.display = 'flex';
             document.getElementById('pks-permintaan-id').value = permintaanId;
             document.getElementById('pks-no-kontrak').value = 'PKS/2026/PRO/' + Math.floor(1000 + Math.random() * 9000);
+            
+            // Auto generate draft PO format: DRAFT-PO/[YEAR]/[NUMBER]
+            document.getElementById('pks-no-draft').value = 'DRAFT-PO/2026/' + Math.floor(100 + Math.random() * 900);
+            
             document.getElementById('pks-no-po').value = 'PO-SUPP-2026-' + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('pks-tgl-kontrak').value = new Date().toISOString().substring(0, 10);
+            document.getElementById('pks-nama-vendor').value = '';
             document.getElementById('pks-po-file').value = '';
             document.getElementById('po-file-preview').innerText = '';
             document.getElementById('pks-modal-error').style.display = 'none';
+            
+            // Populate PKS items table
+            const tbody = document.getElementById('pks-items-body');
+            tbody.innerHTML = '';
+            
+            const req = dataStore.permintaan.find(r => r.id === permintaanId);
+            if (req && req.items && req.items.length > 0) {
+                req.items.forEach(item => {
+                    addPksItemRow({
+                        nama: item.nama || item.nama_barang || '',
+                        qty: item.qty || item.jumlah || 1,
+                        satuan: item.satuan || 'unit',
+                        harga_satuan: 0,
+                        potongan_harga: 0
+                    });
+                });
+            } else {
+                addPksItemRow();
+            }
             
             // Reset termin
             document.getElementById('termin-inputs-container').innerHTML = '';
@@ -2166,32 +2380,67 @@
             document.getElementById('pks-contract-modal').style.display = 'none';
         }
 
+        function addPksItemRow(item = { nama: '', qty: 1, satuan: 'unit', harga_satuan: 0, potongan_harga: 0 }) {
+            const tbody = document.getElementById('pks-items-body');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="form-input pks-item-nama" required value="${item.nama}" style="padding: 4px; font-size:11px;"></td>
+                <td><input type="number" class="form-input pks-item-qty" required min="1" value="${item.qty}" style="padding: 4px; font-size:11px;" oninput="calculatePksTotals()"></td>
+                <td><input type="text" class="form-input pks-item-satuan" required value="${item.satuan}" style="padding: 4px; font-size:11px;"></td>
+                <td><input type="number" class="form-input pks-item-harga" required min="0" value="${item.harga_satuan || ''}" placeholder="Harga" style="padding: 4px; font-size:11px;" oninput="calculatePksTotals()"></td>
+                <td><input type="number" class="form-input pks-item-potongan" required min="0" value="${item.potongan_harga}" style="padding: 4px; font-size:11px;" oninput="calculatePksTotals()"></td>
+                <td><input type="text" class="form-input pks-item-total" readonly value="Rp 0" style="padding: 4px; font-size:11px; background-color: #f3f4f6; font-weight:bold;"></td>
+                <td><button type="button" class="btn" onclick="this.parentNode.parentNode.remove(); calculatePksTotals();" style="width: 24px; height: 24px; background-color: #fee2e2; color: #ef4444; padding: 0; line-height:24px; font-size:11px;">X</button></td>
+            `;
+            tbody.appendChild(tr);
+            calculatePksTotals();
+        }
+
+        function calculatePksTotals() {
+            let totalVal = 0;
+            const rows = document.querySelectorAll('#pks-items-body tr');
+            rows.forEach(row => {
+                const qtyInput = row.querySelector('.pks-item-qty');
+                const priceInput = row.querySelector('.pks-item-harga');
+                const potInput = row.querySelector('.pks-item-potongan');
+                const totalInput = row.querySelector('.pks-item-total');
+
+                const qty = parseFloat(qtyInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                const pot = parseFloat(potInput.value) || 0;
+
+                const rowTotal = Math.max(0, (qty * price) - pot);
+                totalInput.value = 'Rp ' + rowTotal.toLocaleString('id-ID');
+                totalVal += rowTotal;
+            });
+            pksItemsTotalCost = totalVal;
+            document.getElementById('pks-total-kontrak-label').innerText = 'Rp ' + totalVal.toLocaleString('id-ID');
+            calculateTerminNominal();
+        }
+
         function addTerminRow() {
             terminCount++;
             const container = document.getElementById('termin-inputs-container');
             const div = document.createElement('div');
             div.className = 'd-flex gap-10 align-center';
             div.style.marginBottom = '6px';
+            const todayStr = new Date().toISOString().substring(0, 10);
             div.innerHTML = `
                 <span style="font-size: 11px; font-weight:600; width: 60px;">Termin ${terminCount}:</span>
-                <input class="form-input termin-persen" type="number" required min="1" max="100" placeholder="%" style="width: 80px;" onchange="calculateTerminNominal()">
-                <input class="form-input termin-nominal" type="text" readonly placeholder="Nominal" style="flex: 1; background-color: #f3f4f6;">
-                <button type="button" class="btn" onclick="this.parentNode.remove(); calculateTerminNominal();" style="width: 32px; height: 32px; background-color: #fee2e2; color: #ef4444;">X</button>
+                <input class="form-input termin-persen" type="number" required min="1" max="100" placeholder="%" style="width: 70px; padding: 6px; font-size:11px;" onchange="calculateTerminNominal()">
+                <input class="form-input termin-nominal" type="text" readonly placeholder="Nominal" style="flex: 1; background-color: #f3f4f6; padding: 6px; font-size:11px;">
+                <input class="form-input termin-tgl" type="date" required value="${todayStr}" style="width: 130px; padding: 6px; font-size:11px;">
+                <button type="button" class="btn" onclick="this.parentNode.remove(); calculateTerminNominal();" style="width: 28px; height: 28px; background-color: #fee2e2; color: #ef4444; padding: 0; line-height:28px;">X</button>
             `;
             container.appendChild(div);
             calculateTerminNominal();
         }
 
         function calculateTerminNominal() {
-            const reqId = document.getElementById('pks-permintaan-id').value;
-            const req = dataStore.permintaan.find(r => r.id === reqId);
-            if (!req) return;
-
-            const totalNominal = req.estimasi_biaya;
+            const totalNominal = pksItemsTotalCost;
             const rows = document.querySelectorAll('#termin-inputs-container .d-flex');
             
             rows.forEach((row, index) => {
-                // update termin index label
                 row.querySelector('span').innerText = `Termin ${index + 1}:`;
                 
                 const percentInput = row.querySelector('.termin-persen');
@@ -2218,9 +2467,38 @@
             if (!req) return;
 
             const noKontrak = document.getElementById('pks-no-kontrak').value;
+            const noDraftPo = document.getElementById('pks-no-draft').value;
             const noPo = document.getElementById('pks-no-po').value;
+            const tanggalKontrak = document.getElementById('pks-tgl-kontrak').value;
+            const namaVendor = document.getElementById('pks-nama-vendor').value;
             const fileInput = document.getElementById('pks-po-file');
             
+            // Gather items
+            const items = [];
+            const itemRows = document.querySelectorAll('#pks-items-body tr');
+            itemRows.forEach(row => {
+                const nama = row.querySelector('.pks-item-nama').value;
+                const qty = parseInt(row.querySelector('.pks-item-qty').value) || 0;
+                const satuan = row.querySelector('.pks-item-satuan').value;
+                const price = parseFloat(row.querySelector('.pks-item-harga').value) || 0;
+                const pot = parseFloat(row.querySelector('.pks-item-potongan').value) || 0;
+                const rowTotal = Math.max(0, (qty * price) - pot);
+                
+                items.push({
+                    nama: nama,
+                    qty: qty,
+                    satuan: satuan,
+                    harga_satuan: price,
+                    potongan_harga: pot,
+                    harga_total: rowTotal
+                });
+            });
+
+            if (items.length === 0) {
+                showAlert('Harap isi minimal 1 item untuk kontrak PKS!', 'error');
+                return;
+            }
+
             // Validate total termin percentage
             const percentInputs = document.querySelectorAll('.termin-persen');
             let totalPercent = 0;
@@ -2238,11 +2516,13 @@
             const rows = document.querySelectorAll('#termin-inputs-container .d-flex');
             rows.forEach((row, index) => {
                 const percent = parseFloat(row.querySelector('.termin-persen').value);
-                const nominal = Math.floor((percent / 100) * req.estimasi_biaya);
+                const nominal = Math.floor((percent / 100) * pksItemsTotalCost);
+                const tglPembayaran = row.querySelector('.termin-tgl').value;
                 termins.push({
                     index: index + 1,
                     persen: percent,
                     nominal: nominal,
+                    tanggalPembayaran: tglPembayaran,
                     status: 'PENDING_BILLING'
                 });
             });
@@ -2253,9 +2533,13 @@
                 permintaanId: req.id,
                 unit: req.unit,
                 noKontrak: noKontrak,
+                noDraftPo: noDraftPo,
                 noPo: noPo,
-                totalHarga: req.estimasi_biaya,
+                tanggalKontrak: tanggalKontrak,
+                namaVendor: namaVendor,
+                totalHarga: pksItemsTotalCost,
                 poFilePath: fileInput.files[0] ? fileInput.files[0].name : 'PO_Dokumen.pdf',
+                items: items,
                 termins: termins
             };
 
@@ -2365,13 +2649,19 @@
             });
         }
 
+        let tagihanItemsTotalCost = 0;
+
         function handlePksSelectForTagihan() {
             const pksId = document.getElementById('tagihan-pks-select').value;
             const detailsCard = document.getElementById('tagihan-details-card');
             const detailsText = document.getElementById('tagihan-details-text');
+            const itemsContainer = document.getElementById('tagihan-items-container');
+            const totalContainer = document.getElementById('tagihan-total-container');
 
             if (!pksId) {
                 detailsCard.style.display = 'none';
+                itemsContainer.style.display = 'none';
+                totalContainer.style.display = 'none';
                 return;
             }
 
@@ -2381,6 +2671,8 @@
             // Find first pending termin
             const pendingTermin = pks.termins.find(t => t.status === 'PENDING_BILLING');
             if (pendingTermin) {
+                document.getElementById('tagihan-tgl').value = new Date().toISOString().substring(0, 10);
+                
                 detailsText.innerHTML = `
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; width: 100%;">
                         <div style="display: flex; flex-direction: column;">
@@ -2392,13 +2684,70 @@
                             <span style="font-size: 13px; font-weight: 600; color: var(--text-primary);">Termin ke-${pendingTermin.index} (${pendingTermin.persen}%)</span>
                         </div>
                         <div style="display: flex; flex-direction: column;">
-                            <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 4px; font-weight: 600;">Nominal Tagihan</span>
+                            <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: 4px; font-weight: 600;">Nominal Plafon Termin</span>
                             <span style="font-size: 14px; font-weight: 700; color: var(--accent-color);">Rp ${pendingTermin.nominal.toLocaleString('id-ID')}</span>
                         </div>
                     </div>
                 `;
                 detailsCard.style.display = 'block';
+
+                // Populate dynamic items table prefilled from PKS items
+                const tbody = document.getElementById('tagihan-items-body');
+                tbody.innerHTML = '';
+                itemsContainer.style.display = 'block';
+                totalContainer.style.display = 'block';
+
+                if (pks.items && pks.items.length > 0) {
+                    pks.items.forEach(item => {
+                        addTagihanItemRow({
+                            nama: item.nama || '',
+                            qty: item.qty || 1,
+                            satuan: item.satuan || 'unit',
+                            harga_satuan: item.harga_satuan || 0,
+                            potongan_harga: item.potongan_harga || 0
+                        });
+                    });
+                } else {
+                    addTagihanItemRow();
+                }
             }
+        }
+
+        function addTagihanItemRow(item = { nama: '', qty: 1, satuan: 'unit', harga_satuan: 0, potongan_harga: 0 }) {
+            const tbody = document.getElementById('tagihan-items-body');
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="text" class="form-input tagihan-item-nama" required value="${item.nama}" style="padding: 4px; font-size:11px;"></td>
+                <td><input type="number" class="form-input tagihan-item-qty" required min="1" value="${item.qty}" style="padding: 4px; font-size:11px;" oninput="calculateTagihanTotals()"></td>
+                <td><input type="text" class="form-input tagihan-item-satuan" required value="${item.satuan}" style="padding: 4px; font-size:11px;"></td>
+                <td><input type="number" class="form-input tagihan-item-harga" required min="0" value="${item.harga_satuan || ''}" placeholder="Harga" style="padding: 4px; font-size:11px;" oninput="calculateTagihanTotals()"></td>
+                <td><input type="number" class="form-input tagihan-item-potongan" required min="0" value="${item.potongan_harga}" style="padding: 4px; font-size:11px;" oninput="calculateTagihanTotals()"></td>
+                <td><input type="text" class="form-input tagihan-item-total" readonly value="Rp 0" style="padding: 4px; font-size:11px; background-color: #f3f4f6; font-weight:bold;"></td>
+                <td><button type="button" class="btn" onclick="this.parentNode.parentNode.remove(); calculateTagihanTotals();" style="width: 24px; height: 24px; background-color: #fee2e2; color: #ef4444; padding: 0; line-height:24px; font-size:11px;">X</button></td>
+            `;
+            tbody.appendChild(tr);
+            calculateTagihanTotals();
+        }
+
+        function calculateTagihanTotals() {
+            let totalVal = 0;
+            const rows = document.querySelectorAll('#tagihan-items-body tr');
+            rows.forEach(row => {
+                const qtyInput = row.querySelector('.tagihan-item-qty');
+                const priceInput = row.querySelector('.tagihan-item-harga');
+                const potInput = row.querySelector('.tagihan-item-potongan');
+                const totalInput = row.querySelector('.tagihan-item-total');
+
+                const qty = parseFloat(qtyInput.value) || 0;
+                const price = parseFloat(priceInput.value) || 0;
+                const pot = parseFloat(potInput.value) || 0;
+
+                const rowTotal = Math.max(0, (qty * price) - pot);
+                totalInput.value = 'Rp ' + rowTotal.toLocaleString('id-ID');
+                totalVal += rowTotal;
+            });
+            tagihanItemsTotalCost = totalVal;
+            document.getElementById('tagihan-total-label').innerText = 'Rp ' + totalVal.toLocaleString('id-ID');
         }
 
         function previewInvoiceFile() {
@@ -2413,6 +2762,7 @@
             e.preventDefault();
             const pksId = document.getElementById('tagihan-pks-select').value;
             const noInvoice = document.getElementById('tagihan-no-invoice').value;
+            const tanggalTagihan = document.getElementById('tagihan-tgl').value;
             const fileInput = document.getElementById('tagihan-file');
 
             const pks = dataStore.pks.find(p => p.id === pksId);
@@ -2420,6 +2770,32 @@
 
             const pendingTermin = pks.termins.find(t => t.status === 'PENDING_BILLING');
             if (!pendingTermin) return;
+
+            // Gather items
+            const items = [];
+            const itemRows = document.querySelectorAll('#tagihan-items-body tr');
+            itemRows.forEach(row => {
+                const nama = row.querySelector('.tagihan-item-nama').value;
+                const qty = parseInt(row.querySelector('.tagihan-item-qty').value) || 0;
+                const satuan = row.querySelector('.tagihan-item-satuan').value;
+                const price = parseFloat(row.querySelector('.tagihan-item-harga').value) || 0;
+                const pot = parseFloat(row.querySelector('.tagihan-item-potongan').value) || 0;
+                const rowTotal = Math.max(0, (qty * price) - pot);
+                
+                items.push({
+                    nama: nama,
+                    qty: qty,
+                    satuan: satuan,
+                    harga_satuan: price,
+                    potongan_harga: pot,
+                    harga_total: rowTotal
+                });
+            });
+
+            if (items.length === 0) {
+                showAlert('Harap isi minimal 1 item untuk tagihan!', 'error');
+                return;
+            }
 
             // Create tagihan
             const newTagihan = {
@@ -2429,9 +2805,12 @@
                 noPo: pks.noPo,
                 unit: pks.unit,
                 terminIndex: pendingTermin.index,
-                nominal: pendingTermin.nominal,
+                terminId: pendingTermin.id,
+                nominal: tagihanItemsTotalCost,
                 noInvoice: noInvoice,
                 invoiceFilePath: fileInput.files[0] ? fileInput.files[0].name : 'Invoice_Vendor.pdf',
+                tanggalTagihan: tanggalTagihan,
+                items: items,
                 status: 'INVOICE_RECORDED'
             };
 
@@ -2445,6 +2824,8 @@
             document.getElementById('tagihan-file').value = '';
             document.getElementById('invoice-file-preview').innerText = '';
             document.getElementById('tagihan-details-card').style.display = 'none';
+            document.getElementById('tagihan-items-container').style.display = 'none';
+            document.getElementById('tagihan-total-container').style.display = 'none';
 
             showAlert('Tagihan vendor sukses dicatat dan dikirim ke Kasir!', 'success');
             populatePksDropdownForKeuangan();
@@ -2494,59 +2875,105 @@
                     <td>[PDF] ${t.invoiceFilePath}</td>
                     <td><strong>Rp ${t.nominal.toLocaleString('id-ID')}</strong></td>
                     <td>
-                        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
-                            <input type="number" class="form-input kasir-potongan" required placeholder="Denda/Potong (Rp)" value="0" style="width: 140px; height: 32px; font-size:12px;" oninput="updateLiveNominalHelper(this)">
-                            <span class="nominal-helper" style="font-size: 10px; color: var(--accent-color); font-weight: 600;">Rp 0</span>
-                        </div>
-                        <div class="d-flex gap-10" style="margin-top: 6px;">
-                            <button class="btn btn-primary" onclick="cairkanDana('${t.id}', this)" style="height: 32px; width: auto; font-size: 11px; padding: 0 10px;">Cairkan</button>
-                        </div>
+                        <button class="btn btn-primary" onclick="openKasirPencairanModal('${t.id}')" style="height: 32px; font-size: 11px; padding: 0 10px; width: auto;">Cairkan</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        async function cairkanDana(id, buttonEl) {
+        let activePencairanTagihan = null;
+        function openKasirPencairanModal(id) {
             const tagihan = dataStore.tagihan.find(t => t.id === id);
             if (!tagihan) return;
+            
+            activePencairanTagihan = tagihan;
+            document.getElementById('kasir-pencairan-modal').style.display = 'flex';
+            document.getElementById('pencairan-tagihan-id').value = id;
+            document.getElementById('pencairan-no-invoice').value = tagihan.noInvoice;
+            document.getElementById('pencairan-unit').value = tagihan.unit;
+            document.getElementById('pencairan-tgl').value = new Date().toISOString().substring(0, 10);
+            document.getElementById('pencairan-plafon-label').value = 'Rp ' + tagihan.nominal.toLocaleString('id-ID');
+            document.getElementById('pencairan-nominal').value = tagihan.nominal;
+            document.getElementById('pencairan-denda').value = 0;
+            document.getElementById('kasir-modal-error').style.display = 'none';
+            calculateKasirFinal();
+        }
 
-            const inputVal = buttonEl.parentNode.querySelector('.kasir-potongan').value;
-            const denda = parseFloat(inputVal) || 0;
+        function closeKasirPencairanModal() {
+            document.getElementById('kasir-pencairan-modal').style.display = 'none';
+        }
 
-            if (denda < 0 || denda > tagihan.nominal) {
-                showAlert('Nilai denda/potongan tidak logis!', 'error');
+        function calculateKasirFinal() {
+            const nominalInput = parseFloat(document.getElementById('pencairan-nominal').value) || 0;
+            const dendaInput = parseFloat(document.getElementById('pencairan-denda').value) || 0;
+            const finalVal = Math.max(0, nominalInput - dendaInput);
+            document.getElementById('pencairan-final-label').value = 'Rp ' + finalVal.toLocaleString('id-ID');
+        }
+
+        async function submitKasirPencairan(e) {
+            e.preventDefault();
+            if (!activePencairanTagihan) return;
+            
+            const tagihan = activePencairanTagihan;
+            const nominalInput = parseFloat(document.getElementById('pencairan-nominal').value) || 0;
+            const dendaInput = parseFloat(document.getElementById('pencairan-denda').value) || 0;
+            const finalVal = nominalInput - dendaInput;
+            const tglPembayaran = document.getElementById('pencairan-tgl').value;
+            
+            const errDiv = document.getElementById('kasir-modal-error');
+            errDiv.style.display = 'none';
+
+            // Validation: nominal must not exceed invoice nominal (plafon)
+            if (nominalInput > tagihan.nominal) {
+                errDiv.innerText = `Realisasi pembayaran (Rp ${nominalInput.toLocaleString('id-ID')}) melebihi nilai nominal invoice (Rp ${tagihan.nominal.toLocaleString('id-ID')})!`;
+                errDiv.style.display = 'block';
                 return;
             }
 
-            const nominalFinal = tagihan.nominal - denda;
+            if (finalVal < 0) {
+                errDiv.innerText = `Nominal bersih pencairan tidak boleh negatif!`;
+                errDiv.style.display = 'block';
+                return;
+            }
 
-            // Subtract from sisa anggaran unit riil
+            // Sisa pagu validation
             const budgetInfo = dataStore.budget[tagihan.unit];
-            if (nominalFinal > budgetInfo.sisa) {
-                showAlert(`Kesalahan kritis! Nominal pencairan (Rp ${nominalFinal.toLocaleString('id-ID')}) melebihi sisa anggaran unit (Rp ${budgetInfo.sisa.toLocaleString('id-ID')}). Harap hubungi budgeting.`, 'error');
+            if (finalVal > budgetInfo.sisa) {
+                errDiv.innerText = `Kesalahan kritis! Nominal bersih pencairan (Rp ${finalVal.toLocaleString('id-ID')}) melebihi sisa anggaran unit (Rp ${budgetInfo.sisa.toLocaleString('id-ID')})!`;
+                errDiv.style.display = 'block';
                 return;
             }
 
-            budgetInfo.sisa -= nominalFinal;
+            // Perform payout
+            budgetInfo.sisa -= finalVal;
             tagihan.status = 'PAID_COMPLETED';
 
-            // Add to buku kas
-            dataStore.bukukas.push({
-                tanggal: new Date().toISOString().substring(0, 10),
+            const bkRecord = {
+                id: 'BK-' + Date.now(),
+                tanggal: tglPembayaran,
                 unit: tagihan.unit,
                 noInvoice: tagihan.noInvoice,
-                denda: denda,
-                nominalFinal: nominalFinal
-            });
+                nominalPembayaran: finalVal,
+                denda: dendaInput,
+                nominalFinal: finalVal,
+                tipe: 'DEBET',
+                tanggalPembayaran: tglPembayaran,
+                nominalPembayaranSebelumPotongan: nominalInput
+            };
+            
+            dataStore.bukukas.push(bkRecord);
 
-            // Update parent permintaan status if all termins of that PKS are complete
+            // Update parent PKS termin status
             const pks = dataStore.pks.find(p => p.id === tagihan.pksId);
             if (pks) {
-                const matchedTermin = pks.termins.find(tm => tm.index === tagihan.terminIndex);
-                if (matchedTermin) matchedTermin.status = 'PAID';
+                const matchedTermin = pks.termins.find(tm => tm.id === tagihan.terminId || tm.index === tagihan.terminIndex);
+                if (matchedTermin) {
+                    matchedTermin.status = 'PAID';
+                    matchedTermin.tanggalPembayaran = tglPembayaran;
+                }
                 
-                const allTerminsPaid = pks.termins.every(tm => tm.status === 'PAID' || tm.status === 'INVOICED');
+                const allTerminsPaid = pks.termins.every(tm => tm.status === 'PAID');
                 if (allTerminsPaid) {
                     const req = dataStore.permintaan.find(r => r.id === pks.permintaanId);
                     if (req) {
@@ -2557,15 +2984,9 @@
             }
 
             saveDataStore();
-            const bkRecord = dataStore.bukukas[dataStore.bukukas.length - 1];
-            await syncToSupabase('bukukas', {
-                unit: tagihan.unit,
-                noInvoice: tagihan.noInvoice,
-                denda: denda,
-                nominalFinal: nominalFinal,
-                tanggal: bkRecord.tanggal
-            }, 'insert');
+            await syncToSupabase('bukukas', bkRecord, 'insert');
 
+            closeKasirPencairanModal();
             showAlert('Pencairan sukses! Sisa pagu anggaran unit didebet secara otomatis.', 'success');
             renderKasirPencairan();
             renderBukuKas();
@@ -2583,7 +3004,7 @@
             dataStore.bukukas.forEach(k => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${k.tanggal}</td>
+                    <td>${k.tanggalPembayaran || k.tanggal}</td>
                     <td>${k.unit}</td>
                     <td class="hide-mobile-cell">${k.noInvoice}</td>
                     <td class="hide-mobile-cell">Rp ${k.denda.toLocaleString('id-ID')}</td>
@@ -2743,27 +3164,34 @@
             if (!pks) return;
 
             let itemsText = '';
-            pks.items.forEach(item => {
-                itemsText += `• ${item.nama} (${item.qty} ${item.satuan}) - Rp ${item.harga.toLocaleString('id-ID')}/${item.satuan}<br>`;
-            });
+            if (pks.items && pks.items.length > 0) {
+                pks.items.forEach(item => {
+                    itemsText += `• ${item.nama} (${item.qty} ${item.satuan}) - Rp ${(item.harga_satuan || 0).toLocaleString('id-ID')}/${item.satuan} (Pot: Rp ${(item.potongan_harga || 0).toLocaleString('id-ID')})<br>`;
+                });
+            } else {
+                itemsText = '-';
+            }
 
             let terminsText = '';
-            pks.termins.forEach((t, idx) => {
-                let badgeClass = 'status-pending';
-                if (t.status === 'PAID') badgeClass = 'status-paid';
-                else if (t.status === 'INVOICED') badgeClass = 'status-billed';
-                terminsText += `Termin ${idx+1}: ${t.persen}% (Rp ${t.nominal.toLocaleString('id-ID')}) - <span class="status-badge ${badgeClass}">${t.status}</span><br>`;
-            });
+            if (pks.termins) {
+                pks.termins.forEach((t, idx) => {
+                    let badgeClass = 'status-pending';
+                    if (t.status === 'PAID') badgeClass = 'status-paid';
+                    else if (t.status === 'INVOICED' || t.status === 'BILLING_RECORDED') badgeClass = 'status-billed';
+                    terminsText += `Termin ${idx+1}: ${t.persen}% (Rp ${t.nominal.toLocaleString('id-ID')}) [Tgl Bayar: ${t.tanggalPembayaran || '-'}] - <span class="status-badge ${badgeClass}">${t.status}</span><br>`;
+                });
+            }
 
             const details = [
                 { label: 'Nomor Kontrak PKS', value: `<strong>${pks.noKontrak}</strong>` },
-                { label: 'Nomor PO Supplier', value: pks.noPoSupplier },
-                { label: 'Tanggal Kontrak', value: pks.tanggal },
-                { label: 'ID Referensi Pengajuan', value: pks.reqId },
-                { label: 'Vendor Supplier', value: pks.vendorName },
+                { label: 'Nomor Draft PO', value: pks.noDraftPo || '-' },
+                { label: 'Nomor PO Supplier', value: pks.noPo },
+                { label: 'Tanggal Kontrak', value: pks.tanggalKontrak || '-' },
+                { label: 'ID Referensi Pengajuan', value: pks.permintaanId },
+                { label: 'Vendor Supplier', value: pks.namaVendor || 'Supplier Utama' },
                 { label: 'Detail Barang & Harga', value: itemsText },
                 { label: 'Skema Termin Pembayaran', value: terminsText },
-                { label: 'Total Nilai Kontrak', value: `<strong>Rp ${pks.totalNilai.toLocaleString('id-ID')}</strong>` }
+                { label: 'Total Nilai Kontrak', value: `<strong>Rp ${pks.totalHarga.toLocaleString('id-ID')}</strong>` }
             ];
 
             openRowDetailsModal(`Detail Kontrak PKS ${pks.noKontrak}`, details);
@@ -2775,33 +3203,44 @@
 
             let badgeClass = 'status-pending';
             let statusLabel = 'Menunggu';
-            if (t.status === 'PAID') {
+            if (t.status === 'PAID' || t.status === 'PAID_COMPLETED') {
                 badgeClass = 'status-paid';
                 statusLabel = 'Lunas';
             }
 
+            let itemsText = '';
+            if (t.items && t.items.length > 0) {
+                t.items.forEach(item => {
+                    itemsText += `• ${item.nama} (${item.qty} ${item.satuan}) - Rp ${(item.harga_satuan || 0).toLocaleString('id-ID')}/${item.satuan} (Pot: Rp ${(item.potongan_harga || 0).toLocaleString('id-ID')})<br>`;
+                });
+            } else {
+                itemsText = '-';
+            }
+
             const details = [
                 { label: 'Nomor Invoice', value: `<strong>${t.noInvoice}</strong>` },
-                { label: 'Nomor Kontrak PKS', value: t.pksNo },
-                { label: 'Termin Pembayaran', value: `Termin ke-${t.terminKe}` },
-                { label: 'Nilai Kontrak PKS', value: `Rp ${t.nominalPks.toLocaleString('id-ID')}` },
-                { label: 'Nilai Tagihan Terbit', value: `<strong>Rp ${t.nominalTagihan.toLocaleString('id-ID')}</strong>` },
+                { label: 'Nomor Kontrak PKS', value: t.noKontrak },
+                { label: 'Termin Pembayaran', value: `Termin ke-${t.terminIndex}` },
+                { label: 'Tanggal Tagihan', value: t.tanggalTagihan || '-' },
+                { label: 'Detail Barang Tagihan', value: itemsText },
+                { label: 'Nilai Tagihan Terbit', value: `<strong>Rp ${t.nominal.toLocaleString('id-ID')}</strong>` },
                 { label: 'Status Tagihan', value: `<span class="status-badge ${badgeClass}">${statusLabel}</span>` }
             ];
 
             openRowDetailsModal(`Detail Tagihan ${t.noInvoice}`, details);
         }
 
-        function showKasirDetails(noInvoice) {
-            const k = dataStore.bukukas.find(c => c.noInvoice === noInvoice);
+        function showKasirDetails(idOrNoInvoice) {
+            const k = dataStore.bukukas.find(c => c.id === idOrNoInvoice || c.noInvoice === idOrNoInvoice);
             if (!k) return;
 
             const details = [
-                { label: 'Tanggal Bayar/Cair', value: k.tanggal },
+                { label: 'Tanggal Bayar/Cair', value: k.tanggalPembayaran || k.tanggal },
                 { label: 'Referensi Invoice', value: `<strong>${k.noInvoice}</strong>` },
                 { label: 'Unit Pemohon', value: k.unit },
+                { label: 'Nominal Sebelum Potongan', value: `Rp ${(k.nominalPembayaranSebelumPotongan || k.nominalFinal).toLocaleString('id-ID')}` },
                 { label: 'Potongan/Denda', value: `Rp ${k.denda.toLocaleString('id-ID')}` },
-                { label: 'Total Uang Dicairkan', value: `<strong>Rp ${k.nominalFinal.toLocaleString('id-ID')}</strong>` }
+                { label: 'Total Bersih Uang Dicairkan', value: `<strong>Rp ${k.nominalFinal.toLocaleString('id-ID')}</strong>` }
             ];
 
             openRowDetailsModal(`Detail Realisasi Buku Kas`, details);
@@ -2833,6 +3272,40 @@
             openRowDetailsModal(`Laporan Pengadaan ${p.noKontrak}`, details);
         }
 
+        let activePeriodFilter = 'ALL';
+        
+        function handlePeriodFilterChange() {
+            activePeriodFilter = document.getElementById('analitik-period-filter').value;
+            renderCharts();
+        }
+
+        function isDateInPeriod(dateStr, period) {
+            if (!dateStr) return true;
+            if (period === 'ALL') return true;
+
+            const date = new Date(dateStr);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            // Set date to midnight
+            date.setHours(0,0,0,0);
+
+            if (period === 'DAILY') {
+                return date.getTime() === today.getTime();
+            } else if (period === 'WEEKLY') {
+                const diffTime = today.getTime() - date.getTime();
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                return diffDays >= 0 && diffDays <= 7;
+            } else if (period === 'MONTHLY') {
+                const diffTime = today.getTime() - date.getTime();
+                const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                return diffDays >= 0 && diffDays <= 30;
+            } else if (period === 'YEARLY') {
+                return date.getFullYear() === today.getFullYear();
+            }
+            return true;
+        }
+
         let charts = {};
 
         function renderCharts() {
@@ -2846,6 +3319,18 @@
             const titleEl = document.getElementById('analitik-title');
             const subtitleEl = document.getElementById('analitik-subtitle');
             
+            // Keep the selected option synchronized in the select element
+            const periodSelect = document.getElementById('analitik-period-filter');
+            if (periodSelect) {
+                periodSelect.value = activePeriodFilter;
+            }
+
+            // Filter data stores based on selected period
+            const filteredPermintaan = dataStore.permintaan.filter(r => isDateInPeriod(r.tanggal, activePeriodFilter));
+            const filteredPks = dataStore.pks.filter(p => isDateInPeriod(p.tanggalKontrak, activePeriodFilter));
+            const filteredTagihan = dataStore.tagihan.filter(tg => isDateInPeriod(tg.tanggalTagihan, activePeriodFilter));
+            const filteredBukukas = dataStore.bukukas.filter(bk => isDateInPeriod(bk.tanggalPembayaran || bk.tanggal, activePeriodFilter));
+
             // Clean previous charts to prevent memory leak
             if (charts.c1) { charts.c1.destroy(); charts.c1 = null; }
             if (charts.c2) { charts.c2.destroy(); charts.c2 = null; }
@@ -2855,27 +3340,28 @@
                 subtitleEl.innerText = `Laporan khusus untuk unit ${unit}.`;
 
                 const budgetInfo = dataStore.budget[unit] || { pagu: 0, sisa: 0 };
-                const terpakai = budgetInfo.pagu - budgetInfo.sisa;
-                const unitReqs = dataStore.permintaan.filter(r => r.unit === unit);
+                const terpakai = filteredBukukas.filter(bk => bk.unit === unit).reduce((acc, k) => acc + k.nominalFinal, 0);
+                const currentSisa = Math.max(0, budgetInfo.pagu - terpakai);
+                const unitReqs = filteredPermintaan.filter(r => r.unit === unit);
                 const itemTerbeli = unitReqs.filter(r => r.status === 'PAID').length;
 
                 grid.innerHTML = `
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; width: 100%; margin-bottom: 8px;">
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Sisa Anggaran Unit</span>
-                            <strong style="font-size: 20px; color: var(--accent-color); margin-top: 4px;">Rp ${budgetInfo.sisa.toLocaleString('id-ID')}</strong>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Pengeluaran Periode Ini</span>
+                            <strong style="font-size: 20px; color: var(--accent-color); margin-top: 4px;">Rp ${terpakai.toLocaleString('id-ID')}</strong>
                         </div>
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Pengajuan</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Pengajuan (Periode)</span>
                             <strong style="font-size: 20px; color: var(--text-primary); margin-top: 4px;">${unitReqs.length} Transaksi</strong>
                         </div>
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Pengadaan Selesai (Lunas)</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Pengadaan Selesai (Periode)</span>
                             <strong style="font-size: 20px; color: var(--text-primary); margin-top: 4px;">${itemTerbeli} Transaksi</strong>
                         </div>
                     </div>
                     <div class="card" style="flex: 1; min-width: 320px;">
-                        <h3 class="card-title">Proporsi Anggaran Unit (Terpakai vs Sisa Pagu)</h3>
+                        <h3 class="card-title">Proporsi Pengeluaran Unit (Terpakai vs Sisa Pagu)</h3>
                         <div style="position: relative; height: 260px; width: 100%;"><canvas id="chart-pemohon-budget"></canvas></div>
                     </div>
                     <div class="card" style="flex: 1; min-width: 320px;">
@@ -2888,9 +3374,9 @@
                 charts.c1 = new Chart(ctx1, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Terpakai', 'Sisa Pagu'],
+                        labels: ['Terpakai Periode', 'Sisa Pagu'],
                         datasets: [{
-                            data: [terpakai, budgetInfo.sisa],
+                            data: [terpakai, currentSisa],
                             backgroundColor: ['#c99743', '#1f2937']
                         }]
                     },
@@ -2926,22 +3412,22 @@
                 titleEl.innerText = 'Analitik Pengadaan & Logistik Vendor';
                 subtitleEl.innerText = 'Analisis sebaran kontrak PKS, PO, dan status logistik vendor pengadaan.';
 
-                const totalPks = dataStore.pks.length;
-                const totalNominalPks = dataStore.pks.reduce((acc, p) => acc + p.totalHarga, 0);
-                const activePksCount = dataStore.pks.filter(p => p.termins.some(t => t.status !== 'INVOICED')).length;
+                const totalPks = filteredPks.length;
+                const totalNominalPks = filteredPks.reduce((acc, p) => acc + p.totalHarga, 0);
+                const activePksCount = filteredPks.filter(p => p.termins && p.termins.some(t => t.status !== 'PAID')).length;
 
                 grid.innerHTML = `
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; width: 100%; margin-bottom: 8px;">
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Kontrak PKS</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Kontrak PKS (Periode)</span>
                             <strong style="font-size: 20px; color: var(--text-primary); margin-top: 4px;">${totalPks} Kontrak</strong>
                         </div>
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Nilai Komitmen PKS</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Nilai Komitmen PKS (Periode)</span>
                             <strong style="font-size: 20px; color: var(--accent-color); margin-top: 4px;">Rp ${totalNominalPks.toLocaleString('id-ID')}</strong>
                         </div>
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">PKS Berjalan Aktif</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">PKS Berjalan Aktif (Periode)</span>
                             <strong style="font-size: 20px; color: var(--text-primary); margin-top: 4px;">${activePksCount} Kontrak</strong>
                         </div>
                     </div>
@@ -2956,7 +3442,7 @@
                 `;
 
                 const deptPks = {};
-                dataStore.pks.forEach(p => {
+                filteredPks.forEach(p => {
                     deptPks[p.unit] = (deptPks[p.unit] || 0) + 1;
                 });
                 const deptLabels = Object.keys(deptPks);
@@ -2982,8 +3468,8 @@
                 });
 
                 const pksStatus = { berjalan: 0, selesai: 0 };
-                dataStore.pks.forEach(p => {
-                    const isAllPaid = p.termins.every(t => t.status === 'INVOICED');
+                filteredPks.forEach(p => {
+                    const isAllPaid = p.termins && p.termins.every(t => t.status === 'PAID');
                     if (isAllPaid) pksStatus.selesai++;
                     else pksStatus.berjalan++;
                 });
@@ -3007,8 +3493,14 @@
 
                 const categories = Object.keys(dataStore.budget);
                 const totalPagu = categories.reduce((acc, c) => acc + dataStore.budget[c].pagu, 0);
-                const totalSisa = categories.reduce((acc, c) => acc + dataStore.budget[c].sisa, 0);
-                const totalTerserap = totalPagu - totalSisa;
+
+                const terpakaiPerUnit = {};
+                categories.forEach(c => {
+                    terpakaiPerUnit[c] = filteredBukukas.filter(bk => bk.unit === c).reduce((acc, k) => acc + k.nominalFinal, 0);
+                });
+
+                const totalTerserap = categories.reduce((acc, c) => acc + terpakaiPerUnit[c], 0);
+                const totalSisa = Math.max(0, totalPagu - totalTerserap);
 
                 grid.innerHTML = `
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; width: 100%; margin-bottom: 8px;">
@@ -3017,11 +3509,11 @@
                             <strong style="font-size: 20px; color: var(--text-primary); margin-top: 4px;">Rp ${totalPagu.toLocaleString('id-ID')}</strong>
                         </div>
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Realisasi Terserap</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Realisasi Terserap (Periode)</span>
                             <strong style="font-size: 20px; color: var(--accent-color); margin-top: 4px;">Rp ${totalTerserap.toLocaleString('id-ID')}</strong>
                         </div>
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Rasio Penyerapan</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Rasio Penyerapan (Periode)</span>
                             <strong style="font-size: 20px; color: var(--text-primary); margin-top: 4px;">${((totalTerserap / totalPagu) * 100).toFixed(1)}%</strong>
                         </div>
                     </div>
@@ -3035,9 +3527,8 @@
                     </div>
                 `;
 
-                const paguValues = categories.map(c => dataStore.budget[c].pagu);
-                const sisaValues = categories.map(c => dataStore.budget[c].sisa);
-                const terpakaiValues = paguValues.map((p, i) => p - sisaValues[i]);
+                const terpakaiValues = categories.map(c => terpakaiPerUnit[c]);
+                const sisaValues = categories.map(c => Math.max(0, dataStore.budget[c].pagu - terpakaiPerUnit[c]));
 
                 const ctx1 = document.getElementById('chart-budget-bar').getContext('2d');
                 charts.c1 = new Chart(ctx1, {
@@ -3046,7 +3537,7 @@
                         labels: categories,
                         datasets: [
                             {
-                                label: 'Terserap (Rp)',
+                                label: 'Terserap Periode (Rp)',
                                 data: terpakaiValues,
                                 backgroundColor: '#c99743',
                                 borderRadius: 4
@@ -3075,7 +3566,7 @@
                 charts.c2 = new Chart(ctx2, {
                     type: 'doughnut',
                     data: {
-                        labels: ['Total Terserap', 'Sisa Pagu Korporat'],
+                        labels: ['Total Terserap Periode', 'Sisa Pagu Korporat'],
                         datasets: [{
                             data: [totalTerserap, totalSisa],
                             backgroundColor: ['#c99743', '#e5e7eb']
@@ -3088,22 +3579,22 @@
                 titleEl.innerText = 'Analitik Tagihan & Akun Hutang (Accounts Payable)';
                 subtitleEl.innerText = 'Rekapitulasi pencatatan tagihan invoice vendor dan komitmen termin bayar.';
 
-                const totalInvoiceCount = dataStore.tagihan.length;
-                const pendingInvoiceCount = dataStore.tagihan.filter(t => t.status === 'INVOICE_RECORDED').length;
-                const outstandingHutang = dataStore.tagihan.filter(t => t.status === 'INVOICE_RECORDED').reduce((acc, t) => acc + t.nominal, 0);
+                const totalInvoiceCount = filteredTagihan.length;
+                const pendingInvoiceCount = filteredTagihan.filter(t => t.status === 'INVOICE_RECORDED').length;
+                const outstandingHutang = filteredTagihan.filter(t => t.status === 'INVOICE_RECORDED').reduce((acc, t) => acc + t.nominal, 0);
 
                 grid.innerHTML = `
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; width: 100%; margin-bottom: 8px;">
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Tagihan Masuk</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Tagihan Masuk (Periode)</span>
                             <strong style="font-size: 20px; color: var(--text-primary); margin-top: 4px;">${totalInvoiceCount} Invoice</strong>
                         </div>
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Hutang Belum Dibayar</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Hutang Belum Dibayar (Periode)</span>
                             <strong style="font-size: 20px; color: var(--accent-color); margin-top: 4px;">Rp ${outstandingHutang.toLocaleString('id-ID')}</strong>
                         </div>
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Antrean Kasir</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Antrean Kasir (Periode)</span>
                             <strong style="font-size: 20px; color: var(--text-primary); margin-top: 4px;">${pendingInvoiceCount} Invoice</strong>
                         </div>
                     </div>
@@ -3117,7 +3608,7 @@
                     </div>
                 `;
 
-                const paidCount = dataStore.tagihan.filter(t => t.status === 'PAID_COMPLETED').length;
+                const paidCount = filteredTagihan.filter(t => t.status === 'PAID' || t.status === 'PAID_COMPLETED').length;
                 const unpaidCount = totalInvoiceCount - paidCount;
 
                 const ctx1 = document.getElementById('chart-keu-status').getContext('2d');
@@ -3134,7 +3625,7 @@
                 });
 
                 const unitTagih = {};
-                dataStore.tagihan.forEach(t => {
+                filteredTagihan.forEach(t => {
                     unitTagih[t.unit] = (unitTagih[t.unit] || 0) + t.nominal;
                 });
                 const unitLabels = Object.keys(unitTagih);
@@ -3167,22 +3658,22 @@
                 titleEl.innerText = 'Analitik Pengeluaran Buku Kas Riil';
                 subtitleEl.innerText = 'Laporan realisasi arus kas keluar korporat dan efisiensi denda potongan kasir.';
 
-                const totalPaidNominal = dataStore.bukukas.reduce((acc, k) => acc + k.nominalFinal, 0);
-                const totalDenda = dataStore.bukukas.reduce((acc, k) => acc + k.denda, 0);
-                const totalTrans = dataStore.bukukas.length;
+                const totalPaidNominal = filteredBukukas.reduce((acc, k) => acc + k.nominalFinal, 0);
+                const totalDenda = filteredBukukas.reduce((acc, k) => acc + k.denda, 0);
+                const totalTrans = filteredBukukas.length;
 
                 grid.innerHTML = `
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; width: 100%; margin-bottom: 8px;">
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Kas Keluar</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Kas Keluar (Periode)</span>
                             <strong style="font-size: 20px; color: var(--text-primary); margin-top: 4px;">Rp ${totalPaidNominal.toLocaleString('id-ID')}</strong>
                         </div>
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Efisiensi Denda Kas</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Efisiensi Denda (Periode)</span>
                             <strong style="font-size: 20px; color: var(--accent-color); margin-top: 4px;">Rp ${totalDenda.toLocaleString('id-ID')}</strong>
                         </div>
                         <div class="card" style="padding: 16px; display: flex; flex-direction: column; justify-content: center;">
-                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Total Transaksi Kasir</span>
+                            <span style="font-size: 11px; text-transform: uppercase; color: var(--text-secondary); font-weight:600; letter-spacing:0.05em;">Realisasi Transaksi (Periode)</span>
                             <strong style="font-size: 20px; color: var(--text-primary); margin-top: 4px;">${totalTrans} Transaksi</strong>
                         </div>
                     </div>
@@ -3209,8 +3700,8 @@
                     options: { responsive: true, maintainAspectRatio: false }
                 });
 
-                const flowLabels = dataStore.bukukas.map((k, index) => 'Trans ' + (index+1));
-                const flowValues = dataStore.bukukas.map(k => k.nominalFinal);
+                const flowLabels = filteredBukukas.map((k, index) => 'Trans ' + (index+1));
+                const flowValues = filteredBukukas.map(k => k.nominalFinal);
 
                 const ctx2 = document.getElementById('chart-kasir-flow').getContext('2d');
                 charts.c2 = new Chart(ctx2, {

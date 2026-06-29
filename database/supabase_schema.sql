@@ -1,5 +1,6 @@
 -- =========================================================================
 -- SKEMA BASIS DATA SUPABASE - SISTEM INFORMASI PENGADAAN BARANG (SIPB)
+-- VERSION: 2.0 (Optimized with Detail Items, Draft PO, and Kasir details)
 -- =========================================================================
 -- Petunjuk Penggunaan:
 -- Salin dan jalankan seluruh query SQL ini di SQL Editor dashboard Supabase Anda.
@@ -14,8 +15,6 @@ CREATE TABLE IF NOT EXISTS budget_limits (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Enable RLS (Row Level Security) - Dinonaktifkan untuk demonstrasi publik anonim,
--- namun disiapkan untuk diaktifkan jika menggunakan autentikasi JWT penuh.
 ALTER TABLE budget_limits ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read-write" ON budget_limits FOR ALL USING (true) WITH CHECK (true);
 
@@ -49,7 +48,10 @@ CREATE TABLE IF NOT EXISTS pks_kontrak (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     permintaan_id UUID REFERENCES permintaan(id) ON DELETE RESTRICT UNIQUE NOT NULL,
     no_kontrak VARCHAR(100) UNIQUE NOT NULL,
+    no_draft_po VARCHAR(100),
     no_po VARCHAR(100) UNIQUE NOT NULL,
+    tanggal_kontrak DATE NOT NULL DEFAULT CURRENT_DATE,
+    nama_vendor VARCHAR(100) NOT NULL DEFAULT 'Supplier Utama',
     total_harga NUMERIC(15, 2) NOT NULL,
     po_file_path VARCHAR(255) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
@@ -58,6 +60,21 @@ CREATE TABLE IF NOT EXISTS pks_kontrak (
 ALTER TABLE pks_kontrak ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read-write" ON pks_kontrak FOR ALL USING (true) WITH CHECK (true);
 
+-- 4a. Tabel Detail Item PKS (pks_items)
+CREATE TABLE IF NOT EXISTS pks_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    pks_id UUID REFERENCES pks_kontrak(id) ON DELETE CASCADE NOT NULL,
+    nama_barang VARCHAR(255) NOT NULL,
+    jumlah INTEGER NOT NULL CHECK (jumlah > 0),
+    satuan VARCHAR(50) NOT NULL,
+    harga_satuan NUMERIC(15, 2) NOT NULL,
+    potongan_harga NUMERIC(15, 2) NOT NULL DEFAULT 0,
+    harga_total NUMERIC(15, 2) NOT NULL
+);
+
+ALTER TABLE pks_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read-write" ON pks_items FOR ALL USING (true) WITH CHECK (true);
+
 -- 5. Tabel Skema Termin Pembayaran (pks_termins)
 CREATE TABLE IF NOT EXISTS pks_termins (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -65,6 +82,7 @@ CREATE TABLE IF NOT EXISTS pks_termins (
     termin_index INTEGER NOT NULL,
     persen NUMERIC(5, 2) NOT NULL CHECK (persen > 0 AND persen <= 100),
     nominal NUMERIC(15, 2) NOT NULL,
+    tanggal_pembayaran DATE NOT NULL DEFAULT CURRENT_DATE,
     status VARCHAR(50) NOT NULL DEFAULT 'PENDING_BILLING',
     UNIQUE (pks_id, termin_index)
 );
@@ -81,12 +99,28 @@ CREATE TABLE IF NOT EXISTS tagihan (
     no_invoice VARCHAR(100) UNIQUE NOT NULL,
     nominal NUMERIC(15, 2) NOT NULL,
     invoice_file_path VARCHAR(255) NOT NULL,
+    tanggal_tagihan DATE NOT NULL DEFAULT CURRENT_DATE,
     status VARCHAR(50) NOT NULL DEFAULT 'INVOICE_RECORDED',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 ALTER TABLE tagihan ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read-write" ON tagihan FOR ALL USING (true) WITH CHECK (true);
+
+-- 6a. Tabel Detail Item Tagihan (tagihan_items)
+CREATE TABLE IF NOT EXISTS tagihan_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    tagihan_id UUID REFERENCES tagihan(id) ON DELETE CASCADE NOT NULL,
+    nama_barang VARCHAR(255) NOT NULL,
+    jumlah INTEGER NOT NULL CHECK (jumlah > 0),
+    satuan VARCHAR(50) NOT NULL,
+    harga_satuan NUMERIC(15, 2) NOT NULL,
+    potongan_harga NUMERIC(15, 2) NOT NULL DEFAULT 0,
+    harga_total NUMERIC(15, 2) NOT NULL
+);
+
+ALTER TABLE tagihan_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read-write" ON tagihan_items FOR ALL USING (true) WITH CHECK (true);
 
 -- 7. Tabel Catatan Buku Kas (bukukas)
 CREATE TABLE IF NOT EXISTS bukukas (
@@ -98,6 +132,8 @@ CREATE TABLE IF NOT EXISTS bukukas (
     denda NUMERIC(15, 2) NOT NULL DEFAULT 0,
     nominal_final NUMERIC(15, 2) NOT NULL,
     tipe VARCHAR(50) NOT NULL DEFAULT 'DEBET',
+    tanggal_pembayaran DATE NOT NULL DEFAULT CURRENT_DATE,
+    nominal_pembayaran_sebelum_potongan NUMERIC(15, 2),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
