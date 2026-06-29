@@ -147,30 +147,7 @@ def build_delivery_report():
     )
     pdf.ln(3)
 
-    if COMPILATION_MODE == 'optimized':
-        pdf.section_heading("4. Ringkasan Peningkatan & Optimasi Sistem")
-        pdf.paragraph(
-            "Sistem SIPB versi Optimized telah dibekali dengan berbagai penyempurnaan taktis:"
-        )
-        pdf.draw_bullet(
-            "Mengintegrasikan client-side SDK Supabase untuk sinkronisasi database awan secara real-time pada 5 peran pengguna.",
-            "Integrasi Supabase Cloud:"
-        )
-        pdf.draw_bullet(
-            "Mengganti popup alert() browser dengan modal dialog kustom yang dilengkapi animasi mikro fade-in dan ikon visual yang estetis.",
-            "Kustom Dialog Alert & UX:"
-        )
-        pdf.draw_bullet(
-            "Menampilkan format rupiah ter-lokalisasi secara live di bawah input estimasi anggaran (Budgeting) dan denda potongan kasir.",
-            "Nominal Currency Helper:"
-        )
-        pdf.draw_bullet(
-            "Menyertakan analisis RACI matrix, estimasi Story Points, peta jalur kritis pengembangan, operational risk register, dan audit keamanan eksternal.",
-            "Laporan Analisis Taktis:"
-        )
-        pdf.ln(4)
-    else:
-        pdf.ln(2)
+    pdf.ln(2)
     
     # Sign-off section
     pdf.set_text_color(31, 41, 55)
