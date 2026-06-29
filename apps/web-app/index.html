@@ -1491,6 +1491,10 @@
 
             if (settings.mode === 'supabase' && settings.url && settings.key) {
                 try {
+                    // Safety guard: pastikan Supabase CDN berhasil dimuat
+                    if (typeof supabase === 'undefined' || !supabase || !supabase.createClient) {
+                        throw new Error('Supabase CDN belum termuat');
+                    }
                     // Initialize Supabase Client
                     supabaseClient = supabase.createClient(settings.url, settings.key);
                     currentDbMode = 'supabase';
@@ -2650,6 +2654,21 @@
                     ${items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah || 0} ${i.satuan || ''})</li>`).join('')}
                 </ul>`;
             openOffcanvas(`Daftar Barang ${p.noKontrak || p.no_kontrak}`, itemsListHtml);
+        }
+
+        function openOffcanvasForPksTermin(noKontrak) {
+            const p = dataStore.pks.find(pks => pks.noKontrak === noKontrak || pks.no_kontrak === noKontrak);
+            if (!p) return;
+            const termins = p.termins || p.termin || [];
+            const terminsListHtml = `
+                <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                    ${termins.map((t, idx) => {
+                        const indexStr = t.index || (idx + 1);
+                        const nominalStr = (t.nominal || 0).toLocaleString('id-ID');
+                        return `<li><strong>Termin ${indexStr}</strong>: ${t.persen}% — Rp ${nominalStr}</li>`;
+                    }).join('')}
+                </ul>`;
+            openOffcanvas(`Metode Pembayaran Kontrak ${p.noKontrak || p.no_kontrak}`, terminsListHtml);
         }
 
         // Row Details Modal Helper Functions
