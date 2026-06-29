@@ -25,19 +25,20 @@ Di halaman masuk (*login*), Anda tidak perlu mengetik. Cukup klik salah satu tom
 
 ### 3. Pasang di Smartphone Android (Instalasi APK)
 Unduh dan pasang berkas biner aplikasi Android langsung di ponsel Anda:
-📲 **[Unduh sipb-mobile.apk](sipb-mobile.apk)**
+📲 **[Unduh sipb-mobile.apk](bin/sipb-mobile.apk)**
 
 ---
 
 ## 📂 Struktur Berkas Direktori
-* 📁 **`/web-app`**: Kode program web PWA (HTML, CSS, JS) dengan Supabase Client SDK.
-* 📁 **`/app`**: Kode program aplikasi Android native (Jetpack Compose).
-* 📁 **`/assets`**: Aset antarmuka iOS native.
-* 📁 **`/docs`**: Berkas dokumen PDF laporan Tugas 1-5 versi ter-optimasi (bebas ISO, dilengkapi RACI, Story Points, skema Supabase SQL, operational risk register, dan audit keamanan eksternal).
-* 📄 **`Laporan_Penyerahan_Hasil_Uji_SIPB.pdf`**: Lembar rilis resmi berisi seluruh ringkasan link pengerjaan proyek.
+* 📁 **`/apps/web-app`**: Kode program web PWA (HTML, CSS, JS) dengan Supabase Client SDK.
+* 📁 **`/apps/sipb-android`**: Kode program aplikasi Android native (Jetpack Compose).
+* 📁 **`/apps/sipb-ios`**: Aset antarmuka iOS native.
+* 📁 **`/laporan`**: Berkas dokumen PDF laporan Tugas 1-5 versi ter-optimasi (bebas ISO, dilengkapi RACI, Story Points, operational risk register, audit keamanan eksternal, dan Laporan Penyerahan Resmi).
+* 📁 **`/database`**: Berkas skema SQL DDL Supabase (`supabase_schema.sql`).
+* 📁 **`/bin`**: Berkas biner instalasi Android (`sipb-mobile.apk`).
 
 ---
 
 ## 🔗 Tautan Cepat
 * 🌐 **Aplikasi Web Live (Optimized)**: [Buka Aplikasi](https://test-case-system-analysis-case.vercel.app)
-* ⚙️ **Skema SQL Supabase**: [Lihat docs/supabase_schema.sql](docs/supabase_schema.sql)
+* ⚙️ **Skema SQL Supabase**: [Lihat database/supabase_schema.sql](database/supabase_schema.sql)
