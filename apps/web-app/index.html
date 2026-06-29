@@ -645,6 +645,22 @@
             .fab.visible {
                 display: flex;
             }
+
+            /* Table mobile view overrides */
+            .hide-mobile-cell {
+                display: none !important;
+            }
+            .show-mobile-cell {
+                display: table-cell !important;
+            }
+            .table-responsive table {
+                min-width: 100% !important;
+            }
+        }
+
+        /* Mobile Table Responsiveness */
+        .show-mobile-cell {
+            display: none !important;
         }
         @keyframes modalFadeIn {
             from { opacity: 0; transform: scale(0.95); }
@@ -772,9 +788,10 @@
                             <thead>
                                 <tr>
                                     <th>Tgl Pengajuan</th>
-                                    <th>Rincian Item</th>
-                                    <th>Status Alur</th>
-                                    <th>Keterangan / Alasan</th>
+                                    <th class="hide-mobile-cell">Rincian Item</th>
+                                    <th class="hide-mobile-cell">Status Alur</th>
+                                    <th class="hide-mobile-cell">Keterangan / Alasan</th>
+                                    <th class="show-mobile-cell" style="width: 60px; text-align: center;">Detail</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -897,8 +914,9 @@
                                 <tr>
                                     <th>No Kontrak</th>
                                     <th>No Invoice</th>
-                                    <th>File Terlampir</th>
-                                    <th>Status Alur</th>
+                                    <th class="hide-mobile-cell">File Terlampir</th>
+                                    <th class="hide-mobile-cell">Status Alur</th>
+                                    <th class="show-mobile-cell" style="width: 60px; text-align: center;">Detail</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -944,9 +962,10 @@
                                 <tr>
                                     <th>Tgl Bayar</th>
                                     <th>Unit Pemohon</th>
-                                    <th>No Invoice</th>
-                                    <th>Denda/Potongan</th>
+                                    <th class="hide-mobile-cell">No Invoice</th>
+                                    <th class="hide-mobile-cell">Denda/Potongan</th>
                                     <th>Pembayaran Final</th>
+                                    <th class="show-mobile-cell" style="width: 60px; text-align: center;">Detail</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1060,6 +1079,22 @@
             <h3 id="custom-alert-title" style="font-size: 15px; font-weight: 700; margin-bottom: 8px;">Pemberitahuan</h3>
             <p id="custom-alert-message" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; word-break: break-word;"></p>
             <button id="custom-alert-btn" class="btn btn-primary" style="width: 100%; height: 38px; font-size: 13px; border-radius: 6px;" onclick="closeCustomAlert()">OK</button>
+        </div>
+    </div>
+
+    <!-- Reusable Row Details Modal for Mobile/Tablet -->
+    <div id="row-details-modal" class="modal" style="display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 100000; padding: 20px;">
+        <div class="modal-content" style="background: white; border-radius: 8px; width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto; padding: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); animation: modalFadeIn 0.25s ease-out; box-sizing: border-box;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 16px;">
+                <h3 id="row-details-title" style="font-size: 16px; font-weight: 700; margin: 0; color: var(--text-primary);">Detail Informasi</h3>
+                <button onclick="closeRowDetailsModal()" style="background: transparent; border: none; font-size: 24px; cursor: pointer; color: var(--text-secondary);">&times;</button>
+            </div>
+            <div id="row-details-content" style="font-size: 13px; color: var(--text-primary); line-height: 1.6;">
+                <!-- Dynamically filled list -->
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn btn-secondary btn-sm" onclick="closeRowDetailsModal()" style="padding: 6px 14px; font-size: 12px; height: 32px; width: auto; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; background: white; color: var(--text-primary);">Tutup</button>
+            </div>
         </div>
     </div>
 
@@ -1969,7 +2004,7 @@
             
             const myRequests = dataStore.permintaan.filter(r => r.unit === activeSession.unit);
             if (myRequests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Belum ada riwayat pengajuan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Belum ada riwayat pengajuan.</td></tr>`;
                 return;
             }
 
@@ -1979,9 +2014,12 @@
                 const statusBadge = getStatusBadge(r.status);
                 tr.innerHTML = `
                     <td>${r.tanggal}</td>
-                    <td>${itemsText}</td>
-                    <td>${statusBadge}</td>
-                    <td>${r.alasan}</td>
+                    <td class="hide-mobile-cell">${itemsText}</td>
+                    <td class="hide-mobile-cell">${statusBadge}</td>
+                    <td class="hide-mobile-cell">${r.alasan}</td>
+                    <td class="show-mobile-cell" style="text-align: center;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="showReqDetails('${r.id}')" style="min-width: unset; padding: 0.2rem 0.6rem; font-weight: bold; font-size: 11px; height: 28px; width: auto; background: white; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">...</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -2379,7 +2417,7 @@
             tbody.innerHTML = '';
 
             if (dataStore.tagihan.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Belum ada riwayat pencatatan tagihan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Belum ada riwayat pencatatan tagihan.</td></tr>`;
                 return;
             }
 
@@ -2388,8 +2426,11 @@
                 tr.innerHTML = `
                     <td>${t.noKontrak}</td>
                     <td>${t.noInvoice} (Termin ${t.terminIndex} - Rp ${t.nominal.toLocaleString('id-ID')})</td>
-                    <td>[PDF] ${t.invoiceFilePath}</td>
-                    <td>${getStatusBadge(t.status)}</td>
+                    <td class="hide-mobile-cell">[PDF] ${t.invoiceFilePath}</td>
+                    <td class="hide-mobile-cell">${getStatusBadge(t.status)}</td>
+                    <td class="show-mobile-cell" style="text-align: center;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="showTagihanDetails('${t.noInvoice}')" style="min-width: unset; padding: 0.2rem 0.6rem; font-weight: bold; font-size: 11px; height: 28px; width: auto; background: white; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">...</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -2496,7 +2537,7 @@
             tbody.innerHTML = '';
 
             if (dataStore.bukukas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">Buku kas kosong.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-secondary);">Buku kas kosong.</td></tr>`;
                 return;
             }
 
@@ -2505,9 +2546,12 @@
                 tr.innerHTML = `
                     <td>${k.tanggal}</td>
                     <td>${k.unit}</td>
-                    <td>${k.noInvoice}</td>
-                    <td>Rp ${k.denda.toLocaleString('id-ID')}</td>
+                    <td class="hide-mobile-cell">${k.noInvoice}</td>
+                    <td class="hide-mobile-cell">Rp ${k.denda.toLocaleString('id-ID')}</td>
                     <td><strong>Rp ${k.nominalFinal.toLocaleString('id-ID')}</strong></td>
+                    <td class="show-mobile-cell" style="text-align: center;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="showKasirDetails('${k.id}')" style="min-width: unset; padding: 0.2rem 0.6rem; font-weight: bold; font-size: 11px; height: 28px; width: auto; background: white; border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">...</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -2523,8 +2567,169 @@
                 return `<span class="status-badge status-rejected">Ditolak</span>`;
             } else if (status === 'PAID') {
                 return `<span class="status-badge status-paid">Lunas</span>`;
-            }
             return `<span class="status-badge status-pending">${status}</span>`;
+        }
+
+        // Row Details Modal Helper Functions
+        function openRowDetailsModal(title, detailsList) {
+            document.getElementById('row-details-title').innerText = title;
+            const contentDiv = document.getElementById('row-details-content');
+            contentDiv.innerHTML = '';
+            
+            const ul = document.createElement('ul');
+            ul.style.listStyle = 'none';
+            ul.style.padding = '0';
+            ul.style.margin = '0';
+            
+            detailsList.forEach(item => {
+                const li = document.createElement('li');
+                li.style.padding = '10px 0';
+                li.style.borderBottom = '1px solid var(--border-color)';
+                li.style.display = 'flex';
+                li.style.flexDirection = 'column';
+                li.style.gap = '2px';
+                
+                const label = document.createElement('span');
+                label.style.fontSize = '11px';
+                label.style.textTransform = 'uppercase';
+                label.style.fontWeight = '600';
+                label.style.color = 'var(--text-secondary)';
+                label.innerText = item.label;
+                
+                const val = document.createElement('span');
+                val.style.fontSize = '14px';
+                val.style.fontWeight = '500';
+                val.style.color = 'var(--text-primary)';
+                val.innerHTML = item.value;
+                
+                li.appendChild(label);
+                li.appendChild(val);
+                ul.appendChild(li);
+            });
+            contentDiv.appendChild(ul);
+            document.getElementById('row-details-modal').style.display = 'flex';
+        }
+
+        function closeRowDetailsModal() {
+            document.getElementById('row-details-modal').style.display = 'none';
+        }
+
+        function showReqDetails(reqId) {
+            const req = dataStore.permintaan.find(r => r.id === reqId);
+            if (!req) return;
+            
+            const statusBadge = getStatusBadge(req.status);
+            let itemsText = '';
+            req.items.forEach(item => {
+                itemsText += `• ${item.nama} (${item.qty} ${item.satuan})<br>`;
+            });
+
+            const details = [
+                { label: 'ID Transaksi', value: `<strong>${req.id}</strong>` },
+                { label: 'Tanggal Pengajuan', value: req.tanggal },
+                { label: 'Unit Pengaju', value: req.unit },
+                { label: 'Detail Barang', value: itemsText },
+                { label: 'Status Pengajuan', value: statusBadge },
+                { label: 'Keterangan / Alasan', value: req.alasan || '-' }
+            ];
+            
+            openRowDetailsModal(`Detail Pengajuan ${req.id}`, details);
+        }
+
+        function showPksDetails(noKontrak) {
+            const pks = dataStore.pks.find(p => p.noKontrak === noKontrak);
+            if (!pks) return;
+
+            let itemsText = '';
+            pks.items.forEach(item => {
+                itemsText += `• ${item.nama} (${item.qty} ${item.satuan}) - Rp ${item.harga.toLocaleString('id-ID')}/${item.satuan}<br>`;
+            });
+
+            let terminsText = '';
+            pks.termins.forEach((t, idx) => {
+                let badgeClass = 'status-pending';
+                if (t.status === 'PAID') badgeClass = 'status-paid';
+                else if (t.status === 'INVOICED') badgeClass = 'status-billed';
+                terminsText += `Termin ${idx+1}: ${t.persen}% (Rp ${t.nominal.toLocaleString('id-ID')}) - <span class="status-badge ${badgeClass}">${t.status}</span><br>`;
+            });
+
+            const details = [
+                { label: 'Nomor Kontrak PKS', value: `<strong>${pks.noKontrak}</strong>` },
+                { label: 'Nomor PO Supplier', value: pks.noPoSupplier },
+                { label: 'Tanggal Kontrak', value: pks.tanggal },
+                { label: 'ID Referensi Pengajuan', value: pks.reqId },
+                { label: 'Vendor Supplier', value: pks.vendorName },
+                { label: 'Detail Barang & Harga', value: itemsText },
+                { label: 'Skema Termin Pembayaran', value: terminsText },
+                { label: 'Total Nilai Kontrak', value: `<strong>Rp ${pks.totalNilai.toLocaleString('id-ID')}</strong>` }
+            ];
+
+            openRowDetailsModal(`Detail Kontrak PKS ${pks.noKontrak}`, details);
+        }
+
+        function showTagihanDetails(noInvoice) {
+            const t = dataStore.tagihan.find(tag => tag.noInvoice === noInvoice);
+            if (!t) return;
+
+            let badgeClass = 'status-pending';
+            let statusLabel = 'Menunggu';
+            if (t.status === 'PAID') {
+                badgeClass = 'status-paid';
+                statusLabel = 'Lunas';
+            }
+
+            const details = [
+                { label: 'Nomor Invoice', value: `<strong>${t.noInvoice}</strong>` },
+                { label: 'Nomor Kontrak PKS', value: t.pksNo },
+                { label: 'Termin Pembayaran', value: `Termin ke-${t.terminKe}` },
+                { label: 'Nilai Kontrak PKS', value: `Rp ${t.nominalPks.toLocaleString('id-ID')}` },
+                { label: 'Nilai Tagihan Terbit', value: `<strong>Rp ${t.nominalTagihan.toLocaleString('id-ID')}</strong>` },
+                { label: 'Status Tagihan', value: `<span class="status-badge ${badgeClass}">${statusLabel}</span>` }
+            ];
+
+            openRowDetailsModal(`Detail Tagihan ${t.noInvoice}`, details);
+        }
+
+        function showKasirDetails(payId) {
+            const k = dataStore.kasir.find(c => c.id === payId);
+            if (!k) return;
+
+            const details = [
+                { label: 'ID Pembayaran Kasir', value: `<strong>${k.id}</strong>` },
+                { label: 'Tanggal Bayar/Cair', value: k.tanggal },
+                { label: 'Referensi Invoice', value: k.noInvoice },
+                { label: 'Nilai Tagihan Pokok', value: `Rp ${k.nominalTagihan.toLocaleString('id-ID')}` },
+                { label: 'Potongan/Denda', value: `Rp ${k.denda.toLocaleString('id-ID')}` },
+                { label: 'Total Uang Dicairkan', value: `<strong>Rp ${k.nominalFinal.toLocaleString('id-ID')}</strong>` }
+            ];
+
+            openRowDetailsModal(`Detail Realisasi Kasir ${k.id}`, details);
+        }
+
+        function showLaporanDetails(noKontrak) {
+            const p = dataStore.pks.find(pks => pks.noKontrak === noKontrak);
+            if (!p) return;
+            const req = dataStore.permintaan.find(r => r.id === p.reqId);
+            const tagihan = dataStore.tagihan.find(t => t.pksNo === p.noKontrak);
+            const kasir = tagihan ? dataStore.kasir.find(k => k.noInvoice === tagihan.noInvoice) : null;
+
+            let realisasiText = kasir ? `Lunas (Rp ${kasir.nominalFinal.toLocaleString('id-ID')})` : (tagihan ? 'Ditagihkan' : 'Belum Ditagih');
+            
+            let itemsText = '';
+            p.items.forEach(item => {
+                itemsText += `• ${item.nama} (${item.qty} ${item.satuan})<br>`;
+            });
+
+            const details = [
+                { label: 'Tanggal Kontrak', value: p.tanggal },
+                { label: 'Nomor PKS / PO', value: `${p.noKontrak} / ${p.noPoSupplier}` },
+                { label: 'Unit Pengaju', value: req ? req.unit : '-' },
+                { label: 'Detail Barang', value: itemsText },
+                { label: 'Nilai Pengadaan', value: `<strong>Rp ${p.totalNilai.toLocaleString('id-ID')}</strong>` },
+                { label: 'Realisasi Pembayaran', value: realisasiText }
+            ];
+
+            openRowDetailsModal(`Laporan Pengadaan ${p.noKontrak}`, details);
         }
 
         let charts = {};
