@@ -2044,12 +2044,7 @@
 
             myRequests.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemCount = r.items.length;
-                const itemsListHtml = `
-                    <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
-                        ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
-                    </ul>`;
-                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="width: auto; min-width: unset;">Lihat Rincian</button>`;
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvasForRequest('${r.id}')" style="min-width: unset; width: 32px; height: 32px; padding: 0; font-weight: bold; font-size: 14px;">...</button>`;
                 const statusBadge = getStatusBadge(r.status);
                 tr.innerHTML = `
                     <td>${r.tanggal}</td>
@@ -2088,12 +2083,7 @@
 
             pending.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemCount = r.items.length;
-                const itemsListHtml = `
-                    <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
-                        ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
-                    </ul>`;
-                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="width: auto; min-width: unset;">Lihat Rincian</button>`;
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvasForRequest('${r.id}')" style="min-width: unset; width: 32px; height: 32px; padding: 0; font-weight: bold; font-size: 14px;">...</button>`;
                 tr.innerHTML = `
                     <td>${r.unit}</td>
                     <td>${r.tanggal}</td>
@@ -2139,12 +2129,7 @@
 
             approved.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemCount = r.items.length;
-                const itemsListHtml = `
-                    <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
-                        ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
-                    </ul>`;
-                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="width: auto; min-width: unset;">Lihat Rincian</button>`;
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvasForRequest('${r.id}')" style="min-width: unset; width: 32px; height: 32px; padding: 0; font-weight: bold; font-size: 14px;">...</button>`;
                 const costVal = r.estimasi_biaya ? `Rp ${r.estimasi_biaya.toLocaleString('id-ID')}` : 'Rp 0';
                 tr.innerHTML = `
                     <td>${r.unit}</td>
@@ -2294,12 +2279,7 @@
 
             pending.forEach(r => {
                 const tr = document.createElement('tr');
-                const itemCount = r.items.length;
-                const itemsListHtml = `
-                    <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
-                        ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
-                    </ul>`;
-                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="width: auto; min-width: unset;">Lihat Rincian</button>`;
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvasForRequest('${r.id}')" style="min-width: unset; width: 32px; height: 32px; padding: 0; font-weight: bold; font-size: 14px;">...</button>`;
                 const budgetInfo = dataStore.budget[r.unit];
                 const sisaAnggaran = budgetInfo ? budgetInfo.sisa : 0;
                 
@@ -2640,6 +2620,36 @@
             setTimeout(() => {
                 document.getElementById('offcanvas-backdrop').style.display = 'none';
             }, 300);
+        }
+
+        function openOffcanvasForRequest(reqId) {
+            const req = dataStore.permintaan.find(r => r.id === reqId);
+            if (!req) return;
+            const items = req.items || [];
+            const itemsListHtml = `
+                <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                    ${items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah || 0} ${i.satuan || ''})</li>`).join('')}
+                </ul>`;
+            openOffcanvas(`Daftar Barang ${req.id}`, itemsListHtml);
+        }
+
+        function openOffcanvasForPks(noKontrak) {
+            const p = dataStore.pks.find(pks => pks.noKontrak === noKontrak || pks.no_kontrak === noKontrak);
+            if (!p) return;
+            
+            let items = p.items;
+            if (!items || items.length === 0) {
+                const reqId = p.permintaanId || p.req_id;
+                const req = dataStore.permintaan.find(r => r.id === reqId);
+                if (req) items = req.items;
+            }
+            if (!items) items = [];
+
+            const itemsListHtml = `
+                <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
+                    ${items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah || 0} ${i.satuan || ''})</li>`).join('')}
+                </ul>`;
+            openOffcanvas(`Daftar Barang ${p.noKontrak || p.no_kontrak}`, itemsListHtml);
         }
 
         // Row Details Modal Helper Functions
