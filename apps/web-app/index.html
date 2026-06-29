@@ -221,6 +221,30 @@
             background-color: #e5e7eb;
         }
 
+        .btn-outline-gold {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+        .btn-outline-gold:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+        .btn-sm {
+            height: 28px;
+            padding: 0 10px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
         /* 2. LAYOUT & SIDEBAR STYLING */
         #app-layout {
             display: flex;
@@ -2025,7 +2049,7 @@
                     <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
                         ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
                     </ul>`;
-                const itemsText = `<button type="button" class="btn-link" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="background: none; border: none; color: var(--accent-color); font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0; outline: none;">${itemCount} Barang</button>`;
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="width: auto; min-width: unset;">Lihat Rincian</button>`;
                 const statusBadge = getStatusBadge(r.status);
                 tr.innerHTML = `
                     <td>${r.tanggal}</td>
@@ -2069,7 +2093,7 @@
                     <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
                         ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
                     </ul>`;
-                const itemsText = `<button type="button" class="btn-link" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="background: none; border: none; color: var(--accent-color); font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0; outline: none;">${itemCount} Barang</button>`;
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="width: auto; min-width: unset;">Lihat Rincian</button>`;
                 tr.innerHTML = `
                     <td>${r.unit}</td>
                     <td>${r.tanggal}</td>
@@ -2120,7 +2144,7 @@
                     <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
                         ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
                     </ul>`;
-                const itemsText = `<button type="button" class="btn-link" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="background: none; border: none; color: var(--accent-color); font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0; outline: none;">${itemCount} Barang</button>`;
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="width: auto; min-width: unset;">Lihat Rincian</button>`;
                 const costVal = r.estimasi_biaya ? `Rp ${r.estimasi_biaya.toLocaleString('id-ID')}` : 'Rp 0';
                 tr.innerHTML = `
                     <td>${r.unit}</td>
@@ -2275,7 +2299,7 @@
                     <ul style="padding-left: 20px; margin: 0; line-height: 1.8;">
                         ${r.items.map(i => `<li><strong>${i.nama}</strong> (${i.qty || i.jumlah} ${i.satuan})</li>`).join('')}
                     </ul>`;
-                const itemsText = `<button type="button" class="btn-link" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="background: none; border: none; color: var(--accent-color); font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0; outline: none;">${itemCount} Barang</button>`;
+                const itemsText = `<button type="button" class="btn btn-outline-gold btn-sm" onclick="openOffcanvas('Daftar Barang ${r.id}', \`${itemsListHtml}\`)" style="width: auto; min-width: unset;">Lihat Rincian</button>`;
                 const budgetInfo = dataStore.budget[r.unit];
                 const sisaAnggaran = budgetInfo ? budgetInfo.sisa : 0;
                 
