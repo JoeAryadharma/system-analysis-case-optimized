@@ -11,9 +11,9 @@ Penilaian risiko dilakukan menggunakan skala kualitatif 5x5 untuk mengukur tingk
 $$\text{Skor Risiko} = \text{Likelihood} \times \text{Impact}$$
 
 ### Kategori Tingkat Risiko:
-*   🟢 **1 - 5 (Low Risk)**: Risiko dapat diterima tanpa tindakan mitigasi khusus, cukup dipantau berkala.
-*   🟡 **6 - 12 (Medium Risk)**: Risiko memerlukan tindakan pencegahan terencana dan prosedur standar (SOP).
-*   🔴 **15 - 25 (High Risk)**: Risiko kritis yang membutuhkan penanganan segera dan arsitektur pengamanan berlapis.
+*   **1 - 5 (Low Risk)**: Risiko dapat diterima tanpa tindakan mitigasi khusus, cukup dipantau berkala.
+*   **6 - 12 (Medium Risk)**: Risiko memerlukan tindakan pencegahan terencana dan prosedur standar (SOP).
+*   **15 - 25 (High Risk)**: Risiko kritis yang membutuhkan penanganan segera dan arsitektur pengamanan berlapis.
 
 ---
 
@@ -21,13 +21,13 @@ $$\text{Skor Risiko} = \text{Likelihood} \times \text{Impact}$$
 
 | Kode | Deskripsi Risiko | Dampak Bisnis | Likelihood (1-5) | Impact (1-5) | Skor | Tingkat | Strategi Mitigasi Operasional | PIC Peran |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |
-| **R-OPS-01** | Kebocoran data transaksi & draf Kontrak PKS sensitif ke pihak eksternal. | Kehilangan keunggulan kompetitif, pelanggaran kerahasiaan vendor. | 2 | 4 | **8** | 🟡 Medium | Penerapan RBAC ketat, enkripsi file unggahan PO/Invoice di sisi server, enkripsi token sesi. | Procurement / Keuangan |
-| **R-OPS-02** | *Session Hijacking* (pembajakan login) atau brute force akun pengujian. | Akses ilegal ke antrean pencairan dana kasir dan persetujuan budgeting. | 3 | 4 | **12** | 🟡 Medium | Pembatasan umur token sesi, penguncian akun otomatis setelah 5 kali salah password, monitoring log IP. | Sistem Admin / IT |
-| **R-OPS-03** | Inkonsistensi data anggaran (Sisa pagu tidak terdebet saat Kasir mencairkan dana). | Kebocoran anggaran unit (over-budget), dispute laporan audit Buku Kas. | 1 | 5 | **5** | 🟢 Low | Mekanisme transaksi database atomik (ACID) di local storage, validasi balance sebelum pencairan. | Kasir / Budgeting |
-| **R-OPS-04** | Pengajuan ganda (*Double Submission*) pada formulir multi-item Unit Pemohon. | Duplikasi transaksi pengadaan barang, pemborosan sisa pagu unit. | 3 | 3 | **9** | 🟡 Medium | Penonaktifan tombol submit setelah diklik (*Disable Submit Button*), pembuatan hash unik per transaksi. | Unit Pemohon |
-| **R-OPS-05** | Kesalahan input termin bayar Kontrak PKS (Persentase termin tidak tepat 100%). | Kesalahan pembayaran vendor, keterlambatan pelunasan, dispute keuangan. | 2 | 4 | **8** | 🟡 Medium | Validasi otomatis di sisi klien (JS validator) yang memblokir tombol simpan jika akumulasi persen $\neq 100\%$. | Procurement |
-| **R-OPS-06** | File Invoice yang diunggah Keuangan rusak (*corrupted*) atau palsu. | Hambatan verifikasi pembayaran di Kasir, penundaan pencairan riil. | 3 | 3 | **9** | 🟡 Medium | Validasi tipe file ketat (hanya PDF/PNG), batas maksimal ukuran file 2MB, audit verifikasi visual invoice. | Keuangan / Kasir |
-| **R-OPS-07** | Kegagalan server hosting Vercel atau kehilangan koneksi internet lokal (Off-grid). | Operasional pengadaan terhenti, petugas tidak dapat mengakses data antrean. | 2 | 4 | **8** | 🟡 Medium | Implementasi Service Worker PWA untuk caching data luring, sinkronisasi otomatis saat koneksi kembali online. | Developer / DevOps |
+| **R-OPS-01** | Kebocoran data transaksi & draf Kontrak PKS sensitif ke pihak eksternal. | Kehilangan keunggulan kompetitif, pelanggaran kerahasiaan vendor. | 2 | 4 | **8** | Medium | Penerapan RBAC ketat, enkripsi file unggahan PO/Invoice di sisi server, enkripsi token sesi. | Procurement / Keuangan |
+| **R-OPS-02** | *Session Hijacking* (pembajakan login) atau brute force akun pengujian. | Akses ilegal ke antrean pencairan dana kasir dan persetujuan budgeting. | 3 | 4 | **12** | Medium | Pembatasan umur token sesi, penguncian akun otomatis setelah 5 kali salah password, monitoring log IP. | Sistem Admin / IT |
+| **R-OPS-03** | Inkonsistensi data anggaran (Sisa pagu tidak terdebet saat Kasir mencairkan dana). | Kebocoran anggaran unit (over-budget), dispute laporan audit Buku Kas. | 1 | 5 | **5** | Low | Mekanisme transaksi database atomik (ACID) di local storage, validasi balance sebelum pencairan. | Kasir / Budgeting |
+| **R-OPS-04** | Pengajuan ganda (*Double Submission*) pada formulir multi-item Unit Pemohon. | Duplikasi transaksi pengadaan barang, pemborosan sisa pagu unit. | 3 | 3 | **9** | Medium | Penonaktifan tombol submit setelah diklik (*Disable Submit Button*), pembuatan hash unik per transaksi. | Unit Pemohon |
+| **R-OPS-05** | Kesalahan input termin bayar Kontrak PKS (Persentase termin tidak tepat 100%). | Kesalahan pembayaran vendor, keterlambatan pelunasan, dispute keuangan. | 2 | 4 | **8** | Medium | Validasi otomatis di sisi klien (JS validator) yang memblokir tombol simpan jika akumulasi persen $\neq 100\%$. | Procurement |
+| **R-OPS-06** | File Invoice yang diunggah Keuangan rusak (*corrupted*) atau palsu. | Hambatan verifikasi pembayaran di Kasir, penundaan pencairan riil. | 3 | 3 | **9** | Medium | Validasi tipe file ketat (hanya PDF/PNG), batas maksimal ukuran file 2MB, audit verifikasi visual invoice. | Keuangan / Kasir |
+| **R-OPS-07** | Kegagalan server hosting Vercel atau kehilangan koneksi internet lokal (Off-grid). | Operasional pengadaan terhenti, petugas tidak dapat mengakses data antrean. | 2 | 4 | **8** | Medium | Implementasi Service Worker PWA untuk caching data luring, sinkronisasi otomatis saat koneksi kembali online. | Developer / DevOps |
 
 ---
 
