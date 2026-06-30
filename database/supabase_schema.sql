@@ -1,10 +1,7 @@
 -- =========================================================================
 -- SKEMA BASIS DATA SUPABASE - SISTEM INFORMASI PENGADAAN BARANG (SIPB)
--- VERSION: 2.0 (Optimized with Detail Items, Draft PO, and Kasir details)
+-- VERSION: 2.0
 -- =========================================================================
--- Petunjuk Penggunaan:
--- Salin dan jalankan seluruh query SQL ini di SQL Editor dashboard Supabase Anda.
--- Skema ini mendukung integrasi penuh dengan role-based access control (RBAC).
 
 -- 1. Tabel Pagu Anggaran Unit (budget_limits)
 CREATE TABLE IF NOT EXISTS budget_limits (
