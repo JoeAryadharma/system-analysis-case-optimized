@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS permintaan (
     tanggal DATE NOT NULL DEFAULT CURRENT_DATE,
     status VARCHAR(50) NOT NULL DEFAULT 'PENDING_PROCUREMENT',
     alasan TEXT,
+    estimasi_biaya NUMERIC(15, 2) DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

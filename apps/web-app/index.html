@@ -1700,6 +1700,7 @@
                         tanggal: r.tanggal,
                         status: r.status,
                         alasan: r.alasan,
+                        estimasi_biaya: parseFloat(r.estimasi_biaya) || 0,
                         items: r.permintaan_items ? r.permintaan_items.map(i => ({ nama: i.nama, qty: i.qty, satuan: i.satuan })) : []
                     });
                 });
@@ -1809,7 +1810,8 @@
                     } else if (action === 'update') {
                         const { error } = await supabaseClient.from('permintaan').update({
                             status: data.status,
-                            alasan: data.alasan
+                            alasan: data.alasan,
+                            estimasi_biaya: data.estimasi_biaya || 0
                         }).eq('id', data.id);
                         if (error) throw error;
                     }
